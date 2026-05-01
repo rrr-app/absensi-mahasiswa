@@ -61,7 +61,7 @@ body {
 }
 
 .container {
-    max-width: 1500px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 30px;
     position: relative;
@@ -249,6 +249,11 @@ header {
     flex: 1;
     color: #333;
     font-size: 1.5em;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
 }
 
 /* Filter Section */
@@ -514,7 +519,7 @@ header {
     padding: 12px 16px;
     border: 2px solid #e0e0e0;
     border-radius: 12px;
-    font-size: 14px;
+    font-size: 16px;
     transition: all 0.3s ease;
     font-family: 'Inter', sans-serif;
 }
@@ -586,16 +591,16 @@ table {
 th {
     background: var(--gradient-1);
     color: white;
-    padding: 15px;
+    padding: 12px;
     text-align: left;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 td {
     padding: 12px;
     border-bottom: 1px solid #f0f0f0;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 tr:hover {
@@ -625,6 +630,15 @@ tr:hover {
     animation: slideIn 0.3s ease;
     font-weight: 500;
     backdrop-filter: blur(10px);
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    min-width: 280px;
+    max-width: 90%;
+    text-align: center;
+    box-shadow: var(--shadow-md);
 }
 
 .alert-success {
@@ -723,67 +737,447 @@ tr:hover {
     }
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* ============================================ */
+/* MOBILE OPTIMIZATION - TANPA MENGUBAH FITUR */
+/* ============================================ */
+
+/* Tablet (max-width: 1024px) */
+@media (max-width: 1024px) {
     .container {
-        padding: 15px;
+        padding: 20px;
     }
     
+    .stats-dosen-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+}
+
+/* Mobile Landscape (max-width: 768px) */
+@media (max-width: 768px) {
+    .container {
+        padding: 12px;
+    }
+    
+    /* Header Mobile */
+    .header-content {
+        margin-bottom: 16px;
+    }
+    
+    .logo-section {
+        gap: 12px;
+    }
+    
+    .icon-wrapper {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .icon-wrapper .icon {
+        font-size: 1.8em;
+    }
+    
+    .logo-section h1 {
+        font-size: 1.2em;
+    }
+    
+    .subtitle {
+        font-size: 0.7em;
+    }
+    
+    .user-badge span {
+        font-size: 0.8em;
+    }
+    
+    .btn-glass, .btn-glass-outline {
+        padding: 6px 14px;
+        font-size: 0.8em;
+    }
+    
+    /* Date Card Mobile */
+    .date-card {
+        padding: 10px 16px;
+        gap: 10px;
+    }
+    
+    .date-icon {
+        font-size: 1.3em;
+    }
+    
+    .date-value {
+        font-size: 0.9em;
+    }
+    
+    /* Cards Mobile */
+    .form-card, .data-card {
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .card-header {
+        margin-bottom: 16px;
+    }
+    
+    .card-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1.2em;
+    }
+    
+    .card-header h2 {
+        font-size: 1.1em;
+    }
+    
+    /* Form Mobile */
     .form-row {
         grid-template-columns: 1fr;
         gap: 0;
     }
     
-    .filter-controls {
-        grid-template-columns: 1fr;
+    .form-group {
+        margin-bottom: 14px;
     }
     
+    .form-group label {
+        font-size: 0.85em;
+    }
+    
+    .form-group input,
+    .form-group select {
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+    
+    .btn-submit {
+        padding: 12px;
+        font-size: 14px;
+    }
+    
+    /* Filter Mobile */
+    .filter-section {
+        padding: 12px;
+    }
+    
+    .filter-header h3 {
+        font-size: 0.95em;
+    }
+    
+    .filter-controls {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .filter-group select,
+    .filter-group input {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+    
+    .btn-filter {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+    
+    /* Statistics per Dosen Mobile */
+    .stats-dosen-section {
+        padding: 12px;
+    }
+    
+    .stats-dosen-section h3 {
+        font-size: 0.95em;
+        margin-bottom: 10px;
+    }
+    
+    .stats-dosen-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .dosen-stats-card {
+        padding: 10px;
+    }
+    
+    .dosen-name {
+        font-size: 0.8em;
+        margin-bottom: 8px;
+    }
+    
+    .dosen-stat-value {
+        font-size: 14px;
+    }
+    
+    .dosen-stat-label {
+        font-size: 9px;
+    }
+    
+    /* Stats Bar Mobile */
+    .stats-bar {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 12px;
+    }
+    
+    .stat-item {
+        padding: 5px;
+    }
+    
+    .stat-value {
+        font-size: 20px;
+    }
+    
+    .stat-label {
+        font-size: 10px;
+    }
+    
+    /* Action Buttons Mobile */
     .action-buttons {
         flex-direction: column;
+        gap: 8px;
     }
     
     .btn-export, .btn-export-filtered, .btn-reset {
+        justify-content: center;
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+    
+    .button-group {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .button-group .btn-export,
+    .button-group .btn-reset {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Table Mobile - Horizontal Scroll */
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    table {
+        min-width: 700px;
+    }
+    
+    th, td {
+        padding: 10px 8px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+    
+    .btn-delete {
+        padding: 4px 10px;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+}
+
+/* Mobile Small (max-width: 480px) */
+@media (max-width: 480px) {
+    .container {
+        padding: 8px;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .user-info {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .logo-section {
+        width: 100%;
+    }
+    
+    .date-card {
+        width: 100%;
         justify-content: center;
     }
     
     .stats-bar {
         grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
     }
     
+    .stat-value {
+        font-size: 18px;
+    }
+    
+    .dosen-stats-detail {
+        gap: 5px;
+    }
+    
+    .dosen-stat-value {
+        font-size: 12px;
+    }
+    
+    /* Modal Mobile */
+    .modal-content {
+        margin: 30% auto 0;
+        width: 95%;
+    }
+    
+    .modal-header {
+        padding: 14px;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.1em;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    /* Alert Mobile */
+    .alert {
+        top: 10px;
+        padding: 10px 16px;
+        font-size: 13px;
+        min-width: 260px;
+    }
+}
+
+/* Touch Optimization untuk Mobile */
+@media (max-width: 768px) {
+    /* Perbesar area touch untuk button */
+    button, 
+    .btn-glass, 
+    .btn-glass-outline,
+    .btn-submit,
+    .btn-export,
+    .btn-export-filtered,
+    .btn-reset,
+    .btn-filter,
+    .close,
+    .btn-delete {
+        min-height: 44px;
+        cursor: pointer;
+    }
+    
+    /* Hapus efek hover di mobile (akan muncul tap highlight) */
+    .btn-glass:hover,
+    .btn-glass-outline:hover,
+    .btn-submit:hover,
+    .btn-export:hover,
+    .btn-export-filtered:hover,
+    .btn-reset:hover,
+    .btn-filter.reset:hover,
+    .form-card:hover,
+    .data-card:hover {
+        transform: none;
+    }
+    
+    /* Smooth scroll untuk container yg overflow */
+    .table-wrapper,
     .stats-dosen-grid {
-        grid-template-columns: 1fr;
+        -webkit-overflow-scrolling: touch;
     }
     
-    .logo-section {
-        flex-direction: column;
-        text-align: center;
+    /* Optimasi input mobile */
+    input, select, textarea {
+        font-size: 16px !important; /* Mencegah zoom otomatis di iOS */
     }
     
-    .header-content {
-        flex-direction: column;
+    /* Perbaikan modal di mobile */
+    .modal {
+        align-items: flex-end;
+        display: flex;
     }
     
-    .user-info {
+    .modal-content {
+        margin: 0;
         width: 100%;
-        justify-content: center;
+        max-width: 100%;
+        border-radius: 20px 20px 0 0;
+        animation: slideUp 0.3s ease;
     }
     
-    th, td {
-        font-size: 11px;
-        padding: 6px;
+    @keyframes slideUp {
+        from {
+            transform: translateY(100%);
+        }
+        to {
+            transform: translateY(0);
+        }
+    }
+    
+    /* Animasi fadeIn untuk modal overlay */
+    .modal {
+        animation: fadeIn 0.3s ease;
     }
 }
 
-/* Tambahkan ke file style.css */
-.btn-export:disabled,
-.btn-export-filtered:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
+/* iPhone Specific */
+@media (max-width: 428px) and (min-width: 375px) {
+    .stats-bar {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .dosen-stats-detail {
+        grid-template-columns: repeat(4, 1fr);
+    }
 }
 
-.btn-export:disabled:hover,
-.btn-export-filtered:disabled:hover {
-    transform: none;
-    box-shadow: none;
+/* iPad Portrait */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .stats-dosen-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .action-buttons {
+        flex-wrap: wrap;
+    }
+}
+
+/* Dark Mode Support (Optional) */
+@media (prefers-color-scheme: dark) {
+    .form-card, .data-card, .date-card {
+        background: rgba(30, 30, 40, 0.95);
+    }
+    
+    .card-header h2, .logo-section h1 {
+        color: #e0e0e0;
+    }
+    
+    .subtitle, .date-label {
+        color: #aaa;
+    }
+    
+    .form-group label {
+        color: #ccc;
+    }
+    
+    .form-group input,
+    .form-group select {
+        background: #2a2a2a;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+    
+    .dosen-stats-card {
+        background: #2a2a2a;
+    }
+    
+    .dosen-name {
+        color: #e0e0e0;
+    }
+    
+    table {
+        background: #2a2a2a;
+    }
+    
+    td {
+        color: #ccc;
+        border-bottom-color: #444;
+    }
+    
+    .filter-section {
+        background: rgba(255,255,255,0.05);
+    }
 }
