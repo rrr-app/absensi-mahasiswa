@@ -3,7 +3,7 @@
 // Konfigurasi Admin
 const ADMIN_CONFIG = {
     username: 'admin',
-    password: 'admin123!@#'
+    password: 'admin123'
 };
 
 // State
@@ -12,42 +12,65 @@ let filteredData = [];
 let isAdmin = false;
 let isLoading = false;
 
-// Nilai tetap untuk Prodi dan Mata Kuliah
-const PRODI_TETAP = "Teknik Informatika";
-const MATA_KULIAH_TETAP = "Pemrograman Web";
-
-// Daftar Dosen
-const DAFTAR_DOSEN = [
-    "Prof. Dr. Ahmad Suhendra, M.Kom",
-    "Dr. Rina Fitriana, S.Si., M.T",
-    "Ir. Budi Santoso, M.MSI",
-    "Dian Puspita Sari, S.Kom., M.Cs",
-    "Dr. Eng. Hendra Gunawan, S.T., M.T"
-];
-
 // ============================================
-// FUNGSI LOCALSTORAGE (Penyimpanan Permanen)
+// FUNGSI API GOOGLE SHEETS
 // ============================================
 
-// Load data dari localStorage
-function loadDataFromLocalStorage() {
+async function callGoogleScript(action, data = {}) {
+    try {
+        const params = new URLSearchParams({
+            action: action,
+            ...data
+        });
+        
+        const url = `${GOOGLE_SCRIPT_URL}?${params.toString()}`;
+        console.log(`📡 Calling Google Script: ${action}`);
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors'
+        });
+        
+        const result = await response.json();
+        console.log(`📡 Response:`, result);
+        
+        return result;
+    } catch (error) {
+        console.error(`❌ Error calling ${action}:`, error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Load data dari Google Sheets
+async function loadDataFromGoogle() {
     showLoading(true);
     
     try {
-        const storedData = localStorage.getItem('absensi_data_dosen');
+        const result = await callGoogleScript('getData');
         
-        if (storedData) {
-            allAbsensiData = JSON.parse(storedData);
-            console.log(`✅ Loaded ${allAbsensiData.length} records from localStorage`);
+        if (result.success && result.data) {
+            allAbsensiData = result.data.map(item => ({
+                id: item.id,
+                nim: item.nim,
+                nama: item.nama,
+                prodi: item.prodi,
+                mataKuliah: item.mata_kuliah,
+                dosen: item.dosen,
+                keterangan: item.keterangan,
+                waktu: item.waktu,
+                tanggal: item.tanggal,
+                tanggalFormatted: item.tanggal_formatted
+            }));
+            console.log(`✅ Loaded ${allAbsensiData.length} records from Google Sheets`);
         } else {
+            console.error('Load failed:', result.error);
             allAbsensiData = [];
-            console.log('📭 No data found, starting fresh');
         }
         
         applyFilters();
     } catch (error) {
         console.error('Error loading data:', error);
-        showAlert('Gagal memuat data!', 'error');
+        showAlert('Gagal memuat data dari server! Periksa koneksi internet.', 'error');
         allAbsensiData = [];
         applyFilters();
     } finally {
@@ -55,54 +78,110 @@ function loadDataFromLocalStorage() {
     }
 }
 
-// Simpan data ke localStorage
-function saveDataToLocalStorage() {
+// Simpan data ke Google Sheets
+async function saveDataToGoogle(absensiData) {
+    showLoading(true);
+    
     try {
-        localStorage.setItem('absensi_data_dosen', JSON.stringify(allAbsensiData));
-        console.log(`💾 Saved ${allAbsensiData.length} records to localStorage`);
-        return true;
+        const result = await callGoogleScript('addData', {
+            data: JSON.stringify(absensiData)
+        });
+        
+        if (result.success) {
+            await loadDataFromGoogle();
+            showAlert('✅ Data berhasil disimpan ke cloud!', 'success');
+            return true;
+        } else {
+            throw new Error(result.error);
+        }
     } catch (error) {
-        console.error('Error saving data:', error);
-        showAlert('Gagal menyimpan data!', 'error');
+        console.error('Save error:', error);
+        showAlert('Gagal menyimpan data: ' + error.message, 'error');
         return false;
+    } finally {
+        showLoading(false);
     }
 }
 
-// Tambah data baru
-function addNewAbsensi(absensiData) {
-    const newId = Date.now();
-    const newRecord = {
-        id: newId,
-        ...absensiData
-    };
+// Hapus data dari Google Sheets
+async function deleteDataFromGoogle(id) {
+    if (!isAdmin) {
+        showAlert('Hanya admin yang dapat menghapus data!', 'error');
+        return false;
+    }
     
-    allAbsensiData.unshift(newRecord);
-    saveDataToLocalStorage();
-    applyFilters();
-    return true;
-}
-
-// Hapus data
-function deleteAbsensiData(id) {
-    allAbsensiData = allAbsensiData.filter(item => item.id !== id);
-    saveDataToLocalStorage();
-    applyFilters();
-    return true;
+    showLoading(true);
+    
+    try {
+        const result = await callGoogleScript('deleteData', {
+            id: id
+        });
+        
+        if (result.success) {
+            await loadDataFromGoogle();
+            showAlert('✅ Data berhasil dihapus!', 'success');
+            return true;
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error) {
+        console.error('Delete error:', error);
+        showAlert('Gagal menghapus data!', 'error');
+        return false;
+    } finally {
+        showLoading(false);
+    }
 }
 
 // Reset semua data
-function resetAllAbsensiData() {
-    allAbsensiData = [];
-    saveDataToLocalStorage();
-    applyFilters();
-    return true;
+async function resetAllData() {
+    if (!isAdmin) {
+        showAlert('⚠️ Hanya admin yang dapat mereset data!', 'error');
+        return;
+    }
+    
+    if (allAbsensiData.length === 0) {
+        showAlert('Tidak ada data untuk direset', 'error');
+        return;
+    }
+    
+    if (!confirm('⚠️ PERINGATAN: Anda akan menghapus SEMUA data absensi! Tindakan ini tidak dapat dibatalkan. Apakah Anda yakin?')) {
+        return;
+    }
+    
+    showLoading(true);
+    
+    try {
+        const result = await callGoogleScript('resetData');
+        
+        if (result.success) {
+            await loadDataFromGoogle();
+            showAlert('✅ Semua data telah direset!', 'success');
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error) {
+        console.error('Reset error:', error);
+        showAlert('Gagal mereset data!', 'error');
+    } finally {
+        showLoading(false);
+    }
 }
 
-// Cek duplikasi (NIM + Dosen + Tanggal)
-function checkDuplicateAbsensi(nim, dosen, tanggal) {
-    return allAbsensiData.some(item => 
-        item.nim === nim && item.dosen === dosen && item.tanggal === tanggal
-    );
+// Cek duplikasi
+async function checkDuplicateFromGoogle(nim, tanggal, dosen) {
+    try {
+        const result = await callGoogleScript('checkDuplicate', {
+            nim: nim,
+            tanggal: tanggal,
+            dosen: dosen
+        });
+        
+        return result.success && result.isDuplicate;
+    } catch (error) {
+        console.error('Duplicate check error:', error);
+        return false;
+    }
 }
 
 // ============================================
@@ -165,8 +244,8 @@ async function handleSubmitAbsensi(e) {
         return;
     }
     
-    // Cek duplikasi (NIM + Dosen + Tanggal)
-    const isDuplicate = checkDuplicateAbsensi(nim, dosen, tanggal);
+    // Cek duplikasi
+    const isDuplicate = await checkDuplicateFromGoogle(nim, tanggal, dosen);
     if (isDuplicate) {
         showAlert(`❌ Mahasiswa dengan NIM ${nim} sudah melakukan absensi untuk dosen ini hari ini!`, 'error');
         return;
@@ -177,72 +256,27 @@ async function handleSubmitAbsensi(e) {
         nim: nim,
         nama: nama,
         prodi: PRODI_TETAP,
-        mataKuliah: MATA_KULIAH_TETAP,
+        mata_kuliah: MATA_KULIAH_TETAP,
         dosen: dosen,
         keterangan: keterangan,
         waktu: getWaktuSekarang(),
         tanggal: tanggal,
-        tanggalFormatted: formatTanggalIndonesia(tanggal)
+        tanggal_formatted: formatTanggalIndonesia(tanggal)
     };
     
     // Simpan
-    showLoading(true);
-    const success = addNewAbsensi(absensiData);
-    showLoading(false);
+    const success = await saveDataToGoogle(absensiData);
     
     if (success) {
-        showAlert(`✅ Absensi berhasil untuk ${nama} (${nim}) - ${dosen.split(',')[0]}`, 'success');
         e.target.reset();
         document.getElementById('nim').focus();
-        // Reset dropdown dosen ke default
         document.getElementById('dosen').value = '';
     }
 }
 
 // Delete data
 async function deleteSingleData(id) {
-    if (!isAdmin) {
-        showAlert('Hanya admin yang dapat menghapus data!', 'error');
-        return;
-    }
-    
-    if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-        return;
-    }
-    
-    showLoading(true);
-    const dataToDelete = allAbsensiData.find(item => item.id === id);
-    const success = deleteAbsensiData(id);
-    showLoading(false);
-    
-    if (success) {
-        showAlert(`✅ Data ${dataToDelete?.nama} berhasil dihapus`, 'success');
-    }
-}
-
-// Reset semua data
-async function resetAllData() {
-    if (!isAdmin) {
-        showAlert('⚠️ Hanya admin yang dapat mereset data!', 'error');
-        return;
-    }
-    
-    if (allAbsensiData.length === 0) {
-        showAlert('Tidak ada data untuk direset', 'error');
-        return;
-    }
-    
-    if (!confirm('⚠️ PERINGATAN: Anda akan menghapus SEMUA data absensi! Tindakan ini tidak dapat dibatalkan. Apakah Anda yakin?')) {
-        return;
-    }
-    
-    showLoading(true);
-    const success = resetAllAbsensiData();
-    showLoading(false);
-    
-    if (success) {
-        showAlert('✅ Semua data absensi telah direset!', 'success');
-    }
+    await deleteDataFromGoogle(id);
 }
 
 // ============================================
@@ -264,7 +298,6 @@ function applyFilters() {
         return match;
     });
     
-    // Urutkan dari yang terbaru
     filteredData.sort((a, b) => b.id - a.id);
     
     updateStatistics();
@@ -384,10 +417,10 @@ function renderTabel() {
 
 function getBadgeKeterangan(keterangan) {
     const badges = {
-        'Hadir': '<span style="background: #43e97b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">✅ Hadir</span>',
-        'Sakit': '<span style="background: #f6d365; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">🤒 Sakit</span>',
-        'Izin': '<span style="background: #4facfe; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">📋 Izin</span>',
-        'Alpha': '<span style="background: #fa709a; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">❌ Alpha</span>'
+        'Hadir': '<span style="background: #43e97b; color: white; padding: 4px 12px; border-radius: 20px;">✅ Hadir</span>',
+        'Sakit': '<span style="background: #f6d365; color: white; padding: 4px 12px; border-radius: 20px;">🤒 Sakit</span>',
+        'Izin': '<span style="background: #4facfe; color: white; padding: 4px 12px; border-radius: 20px;">📋 Izin</span>',
+        'Alpha': '<span style="background: #fa709a; color: white; padding: 4px 12px; border-radius: 20px;">❌ Alpha</span>'
     };
     return badges[keterangan] || keterangan;
 }
@@ -415,7 +448,7 @@ function showAlert(message, type) {
 
 function exportToExcel(data, type) {
     if (!isAdmin) {
-        showAlert('⚠️ Fitur export hanya dapat digunakan oleh admin! Silakan login sebagai admin terlebih dahulu.', 'error');
+        showAlert('⚠️ Fitur export hanya dapat digunakan oleh admin!', 'error');
         return;
     }
     
@@ -576,7 +609,7 @@ function setupEventListeners() {
     if (btnLogout) btnLogout.addEventListener('click', handleLogout);
     if (btnResetFilter) btnResetFilter.addEventListener('click', resetFilters);
     if (btnRefresh) btnRefresh.addEventListener('click', () => {
-        loadDataFromLocalStorage();
+        loadDataFromGoogle();
         showAlert('Data berhasil direfresh!', 'success');
     });
     if (btnExport) btnExport.addEventListener('click', () => exportToExcel(allAbsensiData, 'semua'));
@@ -613,10 +646,8 @@ function setupEventListeners() {
 }
 
 // Start aplikasi
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Aplikasi dimulai...');
-    console.log('Program Studi:', PRODI_TETAP);
-    console.log('Mata Kuliah:', MATA_KULIAH_TETAP);
     
     setupEventListeners();
     checkSession();
@@ -626,7 +657,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tanggalHariIniEl.textContent = formatTanggalDisplay();
     }
     
-    loadDataFromLocalStorage();
+    await loadDataFromGoogle();
     console.log('✅ Aplikasi siap digunakan');
 });
 
