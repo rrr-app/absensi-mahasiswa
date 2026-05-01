@@ -402,7 +402,7 @@ function renderTabel() {
                 <td>${index + 1}</td>
                 <td>${absen.nama}</td>
                 <td>${absen.nim}</td>
-                <td>${absen.tanggal}</td>
+                <td>${absen.tanggal_formatted}</td>
                 <td>${absen.waktu}</td>
                 <td>${getActionButtons(absen)}</td>
             </tr>
@@ -458,7 +458,7 @@ function exportToExcel(data, type) {
             'No': index + 1,
             'Nama Lengkap': absen.nama,
             'NIM': absen.nim,
-            'Tanggal': absen.tanggal,
+            'Tanggal': absen.tanggal_formatted,
             'Waktu Absensi': absen.waktu
         }));
         
