@@ -22,11 +22,10 @@ let isLoading = false;
 
 // Daftar Dosen
 const DAFTAR_DOSEN = [
-    "Prof. Dr. Ahmad Suhendra, M.Kom",
-    "Dr. Rina Fitriana, S.Si., M.T",
-    "Ir. Budi Santoso, M.MSI",
-    "Dian Puspita Sari, S.Kom., M.Cs",
-    "Dr. Eng. Hendra Gunawan, S.T., M.T"
+    "Ns. Yunita Galih Yudanari, S.Kep.,M.Kep",
+    "Ns. Puji Lestari, M.Kes (Epid)",
+    "Dr. Ns. Priyanto, M. Kep., Sp. KMB",
+    "M. Imron Rosyidi, S.Kep., Ns., M.Kep."
 ];
 
 // ============================================
