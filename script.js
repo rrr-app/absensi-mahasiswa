@@ -1,9 +1,14 @@
 // ============================================
-// KONFIGURASI SUPABASE
-// GANTI DENGAN CREDENTIALS ANDA DARI SUPABASE!
+// KONFIGURASI SUPABASE - GANTI DENGAN MILIK ANDA!
 // ============================================
-const SUPABASE_URL = 'https://ezctveawnkzfiuwkqfwj.supabase.co';  // Ganti dengan URL Project Anda
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6Y3R2ZWF3bmt6Zml1d2txZndqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2Mjk0NjAsImV4cCI6MjA5MzIwNTQ2MH0.Xr-yZoJLAvAp_vWYH1msePEBZJeodRxDMEjK0t-yk_k';  // Ganti dengan Anon Key Anda
+const SUPABASE_URL = 'https://ezctveawnkzfiuwkqfwj.supabase.co';  // GANTI INI!
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6Y3R2ZWF3bmt6Zml1d2txZndqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2Mjk0NjAsImV4cCI6MjA5MzIwNTQ2MH0.Xr-yZoJLAvAp_vWYH1msePEBZJeodRxDMEjK0t-yk_k';  // GANTI INI!
+
+// Cek apakah credentials sudah diganti
+if (SUPABASE_URL === 'https://ezctveawnkzfiuwkqfwj.supabase.co' || SUPABASE_ANON_KEY === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6Y3R2ZWF3bmt6Zml1d2txZndqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2Mjk0NjAsImV4cCI6MjA5MzIwNTQ2MH0.Xr-yZoJLAvAp_vWYH1msePEBZJeodRxDMEjK0t-yk_k') {
+    console.error('⚠️ PERINGATAN: Anda belum mengganti credentials Supabase!');
+    alert('⚠️ Konfigurasi Supabase belum diisi. Silakan buka file script.js dan ganti SUPABASE_URL dan SUPABASE_ANON_KEY dengan milik Anda.');
+}
 
 // Inisialisasi Supabase Client
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -22,29 +27,57 @@ let isLoading = false;
 
 // Daftar Dosen
 const DAFTAR_DOSEN = [
-    "Ns. Yunita Galih Yudanari, S.Kep.,M.Kep",
-    "Ns. Puji Lestari, M.Kes (Epid)",
-    "Dr. Ns. Priyanto, M. Kep., Sp. KMB",
-    "M. Imron Rosyidi, S.Kep., Ns., M.Kep."
+    "Prof. Dr. Ahmad Suhendra, M.Kom",
+    "Dr. Rina Fitriana, S.Si., M.T",
+    "Ir. Budi Santoso, M.MSI",
+    "Dian Puspita Sari, S.Kom., M.Cs",
+    "Dr. Eng. Hendra Gunawan, S.T., M.T"
 ];
 
 // ============================================
 // FUNGSI DATABASE SUPABASE
 // ============================================
 
+// Test koneksi Supabase
+async function testSupabaseConnection() {
+    try {
+        const { data, error } = await supabase
+            .from('absensi')
+            .select('count', { count: 'exact', head: true });
+        
+        if (error) throw error;
+        console.log('✅ Koneksi Supabase berhasil!');
+        return true;
+    } catch (error) {
+        console.error('❌ Koneksi Supabase gagal:', error);
+        showAlert('Gagal terhubung ke database! Periksa koneksi internet dan credentials Supabase.', 'error');
+        return false;
+    }
+}
+
 // Load data dari Supabase
 async function loadDataFromSupabase() {
     showLoading(true);
     
     try {
+        // Test koneksi dulu
+        const isConnected = await testSupabaseConnection();
+        if (!isConnected) {
+            showLoading(false);
+            return;
+        }
+        
         const { data, error } = await supabase
             .from('absensi')
             .select('*')
             .order('created_at', { ascending: false });
         
-        if (error) throw error;
+        if (error) {
+            console.error('Error detail:', error);
+            throw error;
+        }
         
-        if (data) {
+        if (data && data.length > 0) {
             allAbsensiData = data.map(item => ({
                 id: item.id,
                 nim: item.nim,
@@ -57,14 +90,16 @@ async function loadDataFromSupabase() {
                 tanggal: item.tanggal,
                 tanggalFormatted: item.tanggal_formatted
             }));
-            
-            console.log(`Data loaded: ${allAbsensiData.length} records`);
+            console.log(`✅ Data loaded: ${allAbsensiData.length} records`);
+        } else {
+            allAbsensiData = [];
+            console.log('📭 Tidak ada data ditemukan');
         }
         
         applyFilters();
     } catch (error) {
         console.error('Error loading data:', error);
-        showAlert('Gagal memuat data dari server! Periksa koneksi internet Anda.', 'error');
+        showAlert('Gagal memuat data dari server: ' + error.message, 'error');
         allAbsensiData = [];
         applyFilters();
     } finally {
@@ -94,11 +129,26 @@ async function saveDataToSupabase(absensiBaru) {
             ])
             .select();
         
-        if (error) throw error;
+        if (error) {
+            console.error('Insert error:', error);
+            throw error;
+        }
         
         if (data && data[0]) {
-            absensiBaru.id = data[0].id;
-            allAbsensiData.unshift(absensiBaru);
+            const newData = {
+                id: data[0].id,
+                nim: absensiBaru.nim,
+                nama: absensiBaru.nama,
+                prodi: absensiBaru.prodi,
+                mataKuliah: absensiBaru.mataKuliah,
+                dosen: absensiBaru.dosen,
+                keterangan: absensiBaru.keterangan,
+                waktu: absensiBaru.waktu,
+                tanggal: absensiBaru.tanggal,
+                tanggalFormatted: absensiBaru.tanggalFormatted
+            };
+            
+            allAbsensiData.unshift(newData);
             applyFilters();
             showAlert('✅ Data berhasil disimpan ke server!', 'success');
             return true;
@@ -107,7 +157,7 @@ async function saveDataToSupabase(absensiBaru) {
         return false;
     } catch (error) {
         console.error('Error saving data:', error);
-        showAlert('Gagal menyimpan data! Periksa koneksi internet Anda.', 'error');
+        showAlert('Gagal menyimpan data: ' + error.message, 'error');
         return false;
     } finally {
         showLoading(false);
@@ -133,18 +183,18 @@ async function deleteDataFromSupabase(id) {
         
         allAbsensiData = allAbsensiData.filter(item => item.id !== id);
         applyFilters();
-        showAlert('Data berhasil dihapus!', 'success');
+        showAlert('✅ Data berhasil dihapus!', 'success');
         return true;
     } catch (error) {
         console.error('Error deleting data:', error);
-        showAlert('Gagal menghapus data!', 'error');
+        showAlert('Gagal menghapus data: ' + error.message, 'error');
         return false;
     } finally {
         showLoading(false);
     }
 }
 
-// Reset semua data (hapus semua)
+// Reset semua data
 async function resetAllDataFromSupabase() {
     if (!isAdmin) {
         showAlert('⚠️ Hanya admin yang dapat mereset data!', 'error');
@@ -166,24 +216,24 @@ async function resetAllDataFromSupabase() {
         const { error } = await supabase
             .from('absensi')
             .delete()
-            .neq('id', 0); // Hapus semua
+            .neq('id', 0);
         
         if (error) throw error;
         
         allAbsensiData = [];
         applyFilters();
-        showAlert('Semua data absensi telah direset!', 'success');
+        showAlert('✅ Semua data absensi telah direset!', 'success');
         return true;
     } catch (error) {
         console.error('Error resetting data:', error);
-        showAlert('Gagal mereset data!', 'error');
+        showAlert('Gagal mereset data: ' + error.message, 'error');
         return false;
     } finally {
         showLoading(false);
     }
 }
 
-// Cek duplikasi absensi di database (berdasarkan NIM + Dosen + Tanggal)
+// Cek duplikasi absensi
 async function checkDuplicateAbsensi(nim, dosen, tanggal) {
     try {
         const { data, error } = await supabase
@@ -217,6 +267,7 @@ function showLoading(show) {
 
 // Inisialisasi
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Aplikasi dimulai...');
     setupEventListeners();
     setupFilterListeners();
     checkSession();
@@ -233,6 +284,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (modal) {
         modal.style.display = 'none';
     }
+    
+    console.log('✅ Aplikasi siap digunakan');
 });
 
 function setupEventListeners() {
@@ -626,7 +679,7 @@ function renderTabel() {
                     <p>Tidak ada data absensi</p>
                     <small style="color: #999;">Silakan isi absensi di atas</small>
                 </div>
-            <tr>
+            </td>
         </tr>`;
         return;
     }
@@ -656,10 +709,10 @@ function renderTabel() {
 
 function getBadgeKeterangan(keterangan) {
     const badges = {
-        'Hadir': '<span style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">✅ Hadir</span>',
-        'Sakit': '<span style="background: linear-gradient(135deg, #f6d365, #fda085); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">🤒 Sakit</span>',
-        'Izin': '<span style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">📋 Izin</span>',
-        'Alpha': '<span style="background: linear-gradient(135deg, #fa709a, #fee140); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">❌ Alpha</span>'
+        'Hadir': '<span style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; padding: 4px 12px; border-radius: 20px;">✅ Hadir</span>',
+        'Sakit': '<span style="background: linear-gradient(135deg, #f6d365, #fda085); color: white; padding: 4px 12px; border-radius: 20px;">🤒 Sakit</span>',
+        'Izin': '<span style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 4px 12px; border-radius: 20px;">📋 Izin</span>',
+        'Alpha': '<span style="background: linear-gradient(135deg, #fa709a, #fee140); color: white; padding: 4px 12px; border-radius: 20px;">❌ Alpha</span>'
     };
     return badges[keterangan] || keterangan;
 }
@@ -689,7 +742,7 @@ function showAlert(message, type) {
 
 function exportToExcel(data, type) {
     if (!isAdmin) {
-        showAlert('⚠️ Fitur export hanya dapat digunakan oleh admin! Silakan login sebagai admin terlebih dahulu.', 'error');
+        showAlert('⚠️ Fitur export hanya dapat digunakan oleh admin!', 'error');
         return;
     }
     
@@ -719,7 +772,6 @@ function exportToExcel(data, type) {
         showAlert(`✅ Berhasil export ${data.length} data ke Excel`, 'success');
     } catch (error) {
         showAlert('Terjadi kesalahan saat export data', 'error');
-        console.error('Export error:', error);
     }
 }
 
