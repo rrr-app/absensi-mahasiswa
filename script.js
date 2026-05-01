@@ -13,7 +13,7 @@ let isAdmin = false;
 let isLoading = false;
 
 // ============================================
-// FUNGSI API GOOGLE SHEETS
+// FUNGSI API GOOGLE SHEETS - DENGAN CORS HANDLING
 // ============================================
 
 async function callGoogleScript(action, data = {}) {
@@ -24,11 +24,13 @@ async function callGoogleScript(action, data = {}) {
         });
         
         const url = `${GOOGLE_SCRIPT_URL}?${params.toString()}`;
-        console.log(`📡 Calling Google Script: ${action}`, params.toString());
+        console.log(`📡 Calling Google Script: ${action}`);
+        console.log(`📡 URL: ${url}`);
         
         const response = await fetch(url, {
             method: 'GET',
             mode: 'cors',
+            cache: 'no-cache',
             headers: {
                 'Content-Type': 'application/json',
             }
@@ -44,6 +46,15 @@ async function callGoogleScript(action, data = {}) {
         return result;
     } catch (error) {
         console.error(`❌ Error calling ${action}:`, error);
+        console.error('Error details:', error.message);
+        
+        // Tampilkan pesan error yang lebih friendly
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            showAlert('Gagal terhubung ke server. Periksa koneksi internet Anda!', 'error');
+        } else {
+            showAlert(`Error: ${error.message}`, 'error');
+        }
+        
         return { success: false, error: error.message };
     }
 }
@@ -53,7 +64,12 @@ async function loadDataFromGoogle() {
     showLoading(true);
     
     try {
+        // Test koneksi dulu dengan timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+        
         const result = await callGoogleScript('getData');
+        clearTimeout(timeoutId);
         
         if (result.success && result.data) {
             allAbsensiData = result.data.map(item => ({
@@ -69,15 +85,17 @@ async function loadDataFromGoogle() {
                 tanggalFormatted: item.tanggal_formatted
             }));
             console.log(`✅ Loaded ${allAbsensiData.length} records from Google Sheets`);
+            showAlert(`Berhasil memuat ${allAbsensiData.length} data`, 'success');
         } else {
             console.error('Load failed:', result.error);
             allAbsensiData = [];
+            showAlert('Gagal memuat data: ' + (result.error || 'Unknown error'), 'error');
         }
         
         applyFilters();
     } catch (error) {
         console.error('Error loading data:', error);
-        showAlert('Gagal memuat data dari server! Periksa koneksi internet.', 'error');
+        showAlert('Gagal memuat data dari server! Periksa koneksi internet dan CORS settings.', 'error');
         allAbsensiData = [];
         applyFilters();
     } finally {
@@ -110,7 +128,7 @@ async function saveDataToGoogle(absensiData) {
     }
 }
 
-// Hapus data dari Google Sheets - DIPERBAIKI
+// Hapus data dari Google Sheets
 async function deleteDataFromGoogle(id) {
     if (!isAdmin) {
         showAlert('Hanya admin yang dapat menghapus data!', 'error');
@@ -131,13 +149,11 @@ async function deleteDataFromGoogle(id) {
     showLoading(true);
     
     try {
-        // Kirim request ke Google Script dengan action deleteData
         const result = await callGoogleScript('deleteData', {
             id: id.toString()
         });
         
         if (result.success) {
-            // Refresh data dari server
             await loadDataFromGoogle();
             showAlert(`✅ Data ${dataToDelete.nama} berhasil dihapus!`, 'success');
             return true;
@@ -294,7 +310,7 @@ async function handleSubmitAbsensi(e) {
     }
 }
 
-// Delete data - DIPERBAIKI
+// Delete data
 async function deleteSingleData(id) {
     console.log('🗑️ deleteSingleData dipanggil dengan ID:', id);
     
@@ -689,5 +705,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('✅ Aplikasi siap digunakan');
 });
 
-// Global functions - DIPERBAIKI agar bisa dipanggil dari HTML
+// Global functions
 window.deleteSingleData = deleteSingleData;
