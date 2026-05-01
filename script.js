@@ -259,7 +259,7 @@ async function handleSubmitAbsensi(e) {
         keterangan: keterangan,
         waktu: getWaktuSekarang(),
         tanggal: tanggal,
-        tanggal_formatted: formatTanggalIndonesia(tanggal)
+        tanggal_formatted: formatTanggalIndonesia(tanggalString)
     };
     
     // Simpan
