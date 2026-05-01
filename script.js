@@ -5,7 +5,7 @@ const SUPABASE_URL = 'https://ezctveawnkzfiuwkqfwj.supabase.co';  // GANTI INI!
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6Y3R2ZWF3bmt6Zml1d2txZndqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2Mjk0NjAsImV4cCI6MjA5MzIwNTQ2MH0.Xr-yZoJLAvAp_vWYH1msePEBZJeodRxDMEjK0t-yk_k';  // GANTI INI!
 
 // Cek apakah credentials sudah diganti
-if (SUPABASE_URL === 'https://ezctveawnkzfiuwkqfwj.supabase.co' || SUPABASE_ANON_KEY === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6Y3R2ZWF3bmt6Zml1d2txZndqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2Mjk0NjAsImV4cCI6MjA5MzIwNTQ2MH0.Xr-yZoJLAvAp_vWYH1msePEBZJeodRxDMEjK0t-yk_k') {
+if (SUPABASE_URL === 'https://YOUR_PROJECT_ID.supabase.co' || SUPABASE_ANON_KEY === 'YOUR_ANON_KEY') {
     console.error('⚠️ PERINGATAN: Anda belum mengganti credentials Supabase!');
     alert('⚠️ Konfigurasi Supabase belum diisi. Silakan buka file script.js dan ganti SUPABASE_URL dan SUPABASE_ANON_KEY dengan milik Anda.');
 }
@@ -27,11 +27,11 @@ let isLoading = false;
 
 // Daftar Dosen
 const DAFTAR_DOSEN = [
-    "Prof. Dr. Ahmad Suhendra, M.Kom",
-    "Dr. Rina Fitriana, S.Si., M.T",
-    "Ir. Budi Santoso, M.MSI",
-    "Dian Puspita Sari, S.Kom., M.Cs",
-    "Dr. Eng. Hendra Gunawan, S.T., M.T"
+    "Ns. Yunita Galih Yudanari, S.Kep.,M.Kep"
+    "Ns. Puji Lestari, M.Kes (Epid)"
+    "Dr. Ns. Priyanto, M. Kep., Sp. KMB"
+    "M. Imron Rosyidi, S.Kep., Ns., M.Kep."
+
 ];
 
 // ============================================
