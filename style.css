@@ -1135,53 +1135,6 @@ tr:hover {
     }
 }
 
-/* Dark Mode Support (Optional) */
-@media (prefers-color-scheme: dark) {
-    .form-card, .data-card, .date-card {
-        background: rgba(30, 30, 40, 0.95);
-    }
-    
-    .card-header h2, .logo-section h1 {
-        color: #e0e0e0;
-    }
-    
-    .subtitle, .date-label {
-        color: #aaa;
-    }
-    
-    .form-group label {
-        color: #ccc;
-    }
-    
-    .form-group input,
-    .form-group select {
-        background: #2a2a2a;
-        border-color: #444;
-        color: #e0e0e0;
-    }
-    
-    .dosen-stats-card {
-        background: #2a2a2a;
-    }
-    
-    .dosen-name {
-        color: #e0e0e0;
-    }
-    
-    table {
-        background: #2a2a2a;
-    }
-    
-    td {
-        color: #ccc;
-        border-bottom-color: #444;
-    }
-    
-    .filter-section {
-        background: rgba(255,255,255,0.05);
-    }
-}
-
 /* Tambahkan ke file style.css */
 
 .btn-refresh {
