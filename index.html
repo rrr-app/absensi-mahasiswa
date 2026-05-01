@@ -2,8 +2,11 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Absensi Mata Kuliah Inovasi Pelayanan Kesehatan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Aplikasi Absensi Mahasiswa | Mobile</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -21,8 +24,8 @@
                         <span class="icon">📋</span>
                     </div>
                     <div>
-                        <h1>Absensi Mata Kuliah Inovasi Pelayanan Kesehatan</h1>
-                        <p class="subtitle">Universitas Ngudi Waluyo</p>
+                        <h1>Aplikasi Absensi Mahasiswa</h1>
+                        <p class="subtitle">Mata Kuliah: Pemrograman Web | Sistem Absensi Per Dosen</p>
                     </div>
                 </div>
                 <div class="user-info">
@@ -72,10 +75,11 @@
                         </label>
                         <select id="dosen" required>
                             <option value="">Pilih Dosen</option>
-                            <option value="Ns. Yunita Galih Yudanari, S.Kep.,M.Kep">👩‍🏫 Ns. Yunita Galih Yudanari, S.Kep.,M.Kep</option>
-                            <option value="Ns. Puji Lestari, M.Kes (Epid)">👩‍🏫 Ns. Puji Lestari, M.Kes (Epid)</option>
-                            <option value="Dr. Ns. Priyanto, M. Kep., Sp. KMB">👨‍🏫 Dr. Ns. Priyanto, M. Kep., Sp. KMB</option>
-                            <option value="M. Imron Rosyidi, S.Kep., Ns., M.Kep.">👨‍🏫 M. Imron Rosyidi, S.Kep., Ns., M.Kep.</option>
+                            <option value="Prof. Dr. Ahmad Suhendra, M.Kom">👨‍🏫 Prof. Dr. Ahmad Suhendra, M.Kom</option>
+                            <option value="Dr. Rina Fitriana, S.Si., M.T">👩‍🏫 Dr. Rina Fitriana, S.Si., M.T</option>
+                            <option value="Ir. Budi Santoso, M.MSI">👨‍🏫 Ir. Budi Santoso, M.MSI</option>
+                            <option value="Dian Puspita Sari, S.Kom., M.Cs">👩‍🏫 Dian Puspita Sari, S.Kom., M.Cs</option>
+                            <option value="Dr. Eng. Hendra Gunawan, S.T., M.T">👨‍🏫 Dr. Eng. Hendra Gunawan, S.T., M.T</option>
                         </select>
                     </div>
 
@@ -98,8 +102,8 @@
                         <span class="label-icon">🏫</span>
                         Program Studi
                     </label>
-                    <input type="text" id="prodi" value="S1-Keperawatan" readonly disabled style="background: #f0f0f0; cursor: not-allowed;">
-                    <input type="hidden" id="prodi_hidden" value="S1-Keperawatan">
+                    <input type="text" id="prodi" value="Teknik Informatika" readonly disabled style="background: #f0f0f0; cursor: not-allowed;">
+                    <input type="hidden" id="prodi_hidden" value="Teknik Informatika">
                 </div>
                 
                 <div class="form-group">
@@ -107,8 +111,8 @@
                         <span class="label-icon">📖</span>
                         Mata Kuliah
                     </label>
-                    <input type="text" id="mataKuliah" value="Inovasi Pelayanan Kesehatan" readonly disabled style="background: #f0f0f0; cursor: not-allowed;">
-                    <input type="hidden" id="mataKuliah_hidden" value="Inovasi Pelayanan Kesehatan">
+                    <input type="text" id="mataKuliah" value="Pemrograman Web" readonly disabled style="background: #f0f0f0; cursor: not-allowed;">
+                    <input type="hidden" id="mataKuliah_hidden" value="Pemrograman Web">
                 </div>
 
                 <button type="submit" class="btn-submit">
@@ -135,10 +139,10 @@
                         <label>Dosen:</label>
                         <select id="filterDosen">
                             <option value="all">Semua Dosen</option>
-                            <option value="Ns. Yunita Galih Yudanari, S.Kep.,M.Kep">Ns. Yunita Galih Yudanari, S.Kep.,M.Kep</option>
-                            <option value="Ns. Puji Lestari, M.Kes (Epid)">Ns. Puji Lestari, M.Kes (Epid)</option>
-                            <option value="Dr. Ns. Priyanto, M. Kep., Sp. KMB">Dr. Ns. Priyanto, M. Kep., Sp. KMB</option>
-                            <option value="M. Imron Rosyidi, S.Kep., Ns., M.Kep.">M. Imron Rosyidi, S.Kep., Ns., M.Kep.</option>
+                            <option value="Prof. Dr. Ahmad Suhendra, M.Kom">Prof. Dr. Ahmad Suhendra, M.Kom</option>
+                            <option value="Dr. Rina Fitriana, S.Si., M.T">Dr. Rina Fitriana, S.Si., M.T</option>
+                            <option value="Ir. Budi Santoso, M.MSI">Ir. Budi Santoso, M.MSI</option>
+                            <option value="Dian Puspita Sari, S.Kom., M.Cs">Dian Puspita Sari, S.Kom., M.Cs</option>
                             <option value="Dr. Eng. Hendra Gunawan, S.T., M.T">Dr. Eng. Hendra Gunawan, S.T., M.T</option>
                         </select>
                     </div>
@@ -194,11 +198,11 @@
                     </div>
                 </div>
                 <div class="action-buttons">
-                    <button id="btnExport" class="btn-export">
+                    <button id="btnExport" class="btn-export" style="display:none;">
                         <span class="btn-icon">📊</span>
                         Export Semua Data
                     </button>
-                    <button id="btnExportFiltered" class="btn-export-filtered">
+                    <button id="btnExportFiltered" class="btn-export-filtered" style="display:none;">
                         <span class="btn-icon">📋</span>
                         Export Hasil Filter
                     </button>
@@ -240,8 +244,8 @@
         </div>
     </div>
 
-    <!-- Modal Login -->
-    <div id="loginModal" class="modal">
+    <!-- Modal Login - PASTIKAN TIDAK ADA CLASS 'active' atau 'show' -->
+    <div id="loginModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-icon">🔐</div>
@@ -272,22 +276,6 @@
             </div>
         </div>
     </div>
-	
-	<!-- Modifikasi bagian action-buttons -->
-	<div class="action-buttons">
-		<button id="btnExport" class="btn-export" style="display:none;">
-			<span class="btn-icon">📊</span>
-			Export Semua Data
-		</button>
-		<button id="btnExportFiltered" class="btn-export-filtered" style="display:none;">
-			<span class="btn-icon">📋</span>
-			Export Hasil Filter
-		</button>
-		<button id="btnReset" class="btn-reset" style="display:none;">
-			<span class="btn-icon">🗑️</span>
-			Reset Semua Data
-		</button>
-	</div>
 
     <script src="script.js"></script>
 </body>
