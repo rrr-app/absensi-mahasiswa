@@ -197,28 +197,26 @@ function showLoading(show) {
 }
 
 function getTanggalHariIni() {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
-
-function formatTanggalDisplay() {
-    const today = new Date();
-    const options = { day: 'numeric', month: 'long', year: 'numeric' };
-    return today.toLocaleDateString('id-ID', options);
+    return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Makassar' });
 }
 
 function getWaktuSekarang() {
-    const now = new Date();
-    return now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    return new Date().toLocaleTimeString('id-ID', { timeZone: 'Asia/Makassar', hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
-function formatTanggalIndonesia(tanggal) {
-    const date = new Date(tanggal);
-    const options = { day: 'numeric', month: 'long', year: 'numeric' };
-    return date.toLocaleDateString('id-ID', options);
+function formatTanggalDisplay() {
+    return new Date().toLocaleDateString('id-ID', { timeZone: 'Asia/Makassar', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+function formatTanggalIndonesia(tanggalString) {
+    if (tanggalString) {
+        // tanggalString format YYYY-MM-DD
+        const [year, month, day] = tanggalString.split('-');
+        const date = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+        return date.toLocaleDateString('id-ID', { timeZone: 'Asia/Makassar', day: 'numeric', month: 'long', year: 'numeric' });
+    } else {
+        return new Date().toLocaleDateString('id-ID', { timeZone: 'Asia/Makassar', day: 'numeric', month: 'long', year: 'numeric' });
+    }
 }
 
 // Handle submit absensi
@@ -229,7 +227,7 @@ async function handleSubmitAbsensi(e) {
     const nama = document.getElementById('nama').value.trim();
     const dosen = document.getElementById('dosen').value;
     const keterangan = document.getElementById('keterangan').value;
-    const tanggal = getWaktuSekarang();
+    const tanggal = getTanggalHariIni();
     
     console.log('📝 Form submitted:', { nim, nama, dosen, keterangan });
     
