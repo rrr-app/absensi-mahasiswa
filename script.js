@@ -21,7 +21,7 @@ const DAFTAR_DOSEN = [
 // Inisialisasi
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
-    checkSession();
+    checkSession(); // Hanya cek session, TIDAK membuka modal otomatis
     setupEventListeners();
     setupFilterListeners();
 });
@@ -30,7 +30,7 @@ function setupEventListeners() {
     document.getElementById('formAbsensi').addEventListener('submit', handleSubmitAbsensi);
     document.getElementById('btnExport').addEventListener('click', () => exportToExcel(allAbsensiData, 'semua'));
     document.getElementById('btnExportFiltered').addEventListener('click', () => exportToExcel(filteredData, 'filtered'));
-    document.getElementById('btnLogin').addEventListener('click', showLoginModal);
+    document.getElementById('btnLogin').addEventListener('click', showLoginModal); // Modal hanya terbuka saat tombol ditekan
     document.getElementById('btnLogout').addEventListener('click', handleLogout);
     document.getElementById('btnReset').addEventListener('click', resetAllData);
     document.getElementById('btnResetFilter').addEventListener('click', resetFilters);
@@ -38,7 +38,11 @@ function setupEventListeners() {
     const modal = document.getElementById('loginModal');
     const closeBtn = document.getElementsByClassName('close')[0];
     
-    closeBtn.onclick = () => modal.style.display = 'none';
+    // Hanya set close button, tidak membuka modal otomatis
+    if (closeBtn) {
+        closeBtn.onclick = () => modal.style.display = 'none';
+    }
+    
     window.onclick = (event) => {
         if (event.target === modal) {
             modal.style.display = 'none';
@@ -49,13 +53,19 @@ function setupEventListeners() {
 }
 
 function setupFilterListeners() {
-    document.getElementById('filterDosen').addEventListener('change', applyFilters);
-    document.getElementById('filterKeterangan').addEventListener('change', applyFilters);
-    document.getElementById('filterTanggal').addEventListener('change', applyFilters);
-    document.getElementById('filterSearch').addEventListener('input', applyFilters);
+    const filterDosen = document.getElementById('filterDosen');
+    const filterKeterangan = document.getElementById('filterKeterangan');
+    const filterTanggal = document.getElementById('filterTanggal');
+    const filterSearch = document.getElementById('filterSearch');
+    
+    if (filterDosen) filterDosen.addEventListener('change', applyFilters);
+    if (filterKeterangan) filterKeterangan.addEventListener('change', applyFilters);
+    if (filterTanggal) filterTanggal.addEventListener('change', applyFilters);
+    if (filterSearch) filterSearch.addEventListener('input', applyFilters);
 }
 
 function checkSession() {
+    // Hanya cek session, TIDAK membuka modal otomatis
     const savedSession = localStorage.getItem('adminSession');
     if (savedSession) {
         const session = JSON.parse(savedSession);
@@ -68,31 +78,84 @@ function checkSession() {
             updateAdminUI();
         } else {
             localStorage.removeItem('adminSession');
+            isAdmin = false;
+            updateUserUI();
         }
+    } else {
+        isAdmin = false;
+        updateUserUI();
     }
     updateUIByRole();
 }
 
 function updateAdminUI() {
-    document.getElementById('userStatus').innerHTML = '👑 Admin';
-    document.getElementById('userStatus').style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
-    document.getElementById('userStatus').style.color = 'white';
-    document.getElementById('btnLogin').style.display = 'none';
-    document.getElementById('btnLogout').style.display = 'inline-block';
-    document.getElementById('btnReset').style.display = 'flex';
+    // Update UI Admin (Desktop)
+    const userStatus = document.getElementById('userStatus');
+    if (userStatus) {
+        userStatus.innerHTML = '👑 Admin';
+        userStatus.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+        userStatus.style.color = 'white';
+    }
+    
+    const btnLogin = document.getElementById('btnLogin');
+    const btnLogout = document.getElementById('btnLogout');
+    const btnReset = document.getElementById('btnReset');
+    
+    if (btnLogin) btnLogin.style.display = 'none';
+    if (btnLogout) btnLogout.style.display = 'inline-block';
+    if (btnReset) btnReset.style.display = 'flex';
+    
+    // Tampilkan tombol export untuk admin
+    const exportButtons = document.querySelectorAll('.btn-export, .btn-export-filtered');
+    exportButtons.forEach(btn => {
+        btn.style.display = 'flex';
+    });
 }
 
 function updateUserUI() {
-    document.getElementById('userStatus').innerHTML = '👤 Pengguna';
-    document.getElementById('userStatus').style.background = 'white';
-    document.getElementById('userStatus').style.color = '#667eea';
-    document.getElementById('btnLogin').style.display = 'inline-block';
-    document.getElementById('btnLogout').style.display = 'none';
-    document.getElementById('btnReset').style.display = 'none';
+    // Update UI User (Desktop)
+    const userStatus = document.getElementById('userStatus');
+    if (userStatus) {
+        userStatus.innerHTML = '👤 Pengguna';
+        userStatus.style.background = 'white';
+        userStatus.style.color = '#667eea';
+    }
+    
+    const btnLogin = document.getElementById('btnLogin');
+    const btnLogout = document.getElementById('btnLogout');
+    const btnReset = document.getElementById('btnReset');
+    
+    if (btnLogin) btnLogin.style.display = 'inline-block';
+    if (btnLogout) btnLogout.style.display = 'none';
+    if (btnReset) btnReset.style.display = 'none';
+    
+    // Sembunyikan tombol export untuk non-admin
+    const exportButtons = document.querySelectorAll('.btn-export, .btn-export-filtered');
+    exportButtons.forEach(btn => {
+        btn.style.display = 'none';
+    });
+}
+
+function updateUIByRole() {
+    if (isAdmin) {
+        updateAdminUI();
+    } else {
+        updateUserUI();
+    }
 }
 
 function showLoginModal() {
-    document.getElementById('loginModal').style.display = 'block';
+    // Modal hanya terbuka saat tombol login ditekan
+    const modal = document.getElementById('loginModal');
+    if (modal) {
+        modal.style.display = 'block';
+        // Reset form
+        document.getElementById('loginForm').reset();
+        // Focus ke username
+        setTimeout(() => {
+            document.getElementById('username').focus();
+        }, 100);
+    }
 }
 
 function handleLogin(e) {
@@ -109,10 +172,19 @@ function handleLogin(e) {
         };
         localStorage.setItem('adminSession', JSON.stringify(session));
         updateAdminUI();
-        document.getElementById('loginModal').style.display = 'none';
+        
+        // Tutup modal
+        const modal = document.getElementById('loginModal');
+        if (modal) modal.style.display = 'none';
+        
+        // Reset form
         document.getElementById('loginForm').reset();
+        
         showAlert('Login berhasil! Selamat datang Admin.', 'success');
+        
+        // Refresh tampilan data (menampilkan tombol hapus)
         renderTabel();
+        renderCardView(); // Jika menggunakan card view
     } else {
         showAlert('Username atau password salah!', 'error');
         document.getElementById('password').value = '';
@@ -125,18 +197,14 @@ function handleLogout() {
         localStorage.removeItem('adminSession');
         updateUserUI();
         showAlert('Anda telah logout dari mode admin.', 'success');
+        
+        // Refresh tampilan data (menyembunyikan tombol hapus)
         renderTabel();
+        renderCardView(); // Jika menggunakan card view
     }
 }
 
-function updateUIByRole() {
-    if (isAdmin) {
-        updateAdminUI();
-    } else {
-        updateUserUI();
-    }
-}
-
+// Fungsi lainnya tetap sama seperti sebelumnya
 function getTanggalHariIni() {
     const today = new Date();
     const year = today.getFullYear();
@@ -168,7 +236,6 @@ function loadData() {
     if (storedData) {
         allAbsensiData = JSON.parse(storedData);
     } else {
-        // Contoh data dummy
         allAbsensiData = [];
     }
     
@@ -270,27 +337,32 @@ function resetAllData() {
 }
 
 function applyFilters() {
-    const filterDosen = document.getElementById('filterDosen').value;
-    const filterKeterangan = document.getElementById('filterKeterangan').value;
-    const filterTanggal = document.getElementById('filterTanggal').value;
-    const filterSearch = document.getElementById('filterSearch').value.toLowerCase();
+    const filterDosen = document.getElementById('filterDosen');
+    const filterKeterangan = document.getElementById('filterKeterangan');
+    const filterTanggal = document.getElementById('filterTanggal');
+    const filterSearch = document.getElementById('filterSearch');
+    
+    const filterDosenValue = filterDosen ? filterDosen.value : 'all';
+    const filterKeteranganValue = filterKeterangan ? filterKeterangan.value : 'all';
+    const filterTanggalValue = filterTanggal ? filterTanggal.value : '';
+    const filterSearchValue = filterSearch ? filterSearch.value.toLowerCase() : '';
     
     filteredData = allAbsensiData.filter(data => {
         let match = true;
         
-        if (filterDosen !== 'all' && data.dosen !== filterDosen) {
+        if (filterDosenValue !== 'all' && data.dosen !== filterDosenValue) {
             match = false;
         }
         
-        if (filterKeterangan !== 'all' && data.keterangan !== filterKeterangan) {
+        if (filterKeteranganValue !== 'all' && data.keterangan !== filterKeteranganValue) {
             match = false;
         }
         
-        if (filterTanggal && data.tanggal !== filterTanggal) {
+        if (filterTanggalValue && data.tanggal !== filterTanggalValue) {
             match = false;
         }
         
-        if (filterSearch && !data.nim.includes(filterSearch) && !data.nama.toLowerCase().includes(filterSearch)) {
+        if (filterSearchValue && !data.nim.includes(filterSearchValue) && !data.nama.toLowerCase().includes(filterSearchValue)) {
             match = false;
         }
         
@@ -303,13 +375,20 @@ function applyFilters() {
     updateStatistics();
     updateStatisticsPerDosen();
     renderTabel();
+    renderCardView(); // Jika menggunakan card view
 }
 
 function resetFilters() {
-    document.getElementById('filterDosen').value = 'all';
-    document.getElementById('filterKeterangan').value = 'all';
-    document.getElementById('filterTanggal').value = '';
-    document.getElementById('filterSearch').value = '';
+    const filterDosen = document.getElementById('filterDosen');
+    const filterKeterangan = document.getElementById('filterKeterangan');
+    const filterTanggal = document.getElementById('filterTanggal');
+    const filterSearch = document.getElementById('filterSearch');
+    
+    if (filterDosen) filterDosen.value = 'all';
+    if (filterKeterangan) filterKeterangan.value = 'all';
+    if (filterTanggal) filterTanggal.value = '';
+    if (filterSearch) filterSearch.value = '';
+    
     applyFilters();
     showAlert('Filter telah direset', 'success');
 }
@@ -321,11 +400,17 @@ function updateStatistics() {
     const izin = filteredData.filter(a => a.keterangan === 'Izin').length;
     const alpha = filteredData.filter(a => a.keterangan === 'Alpha').length;
     
-    document.getElementById('totalData').textContent = total;
-    document.getElementById('totalHadir').textContent = hadir;
-    document.getElementById('totalSakit').textContent = sakit;
-    document.getElementById('totalIzin').textContent = izin;
-    document.getElementById('totalAlpha').textContent = alpha;
+    const totalDataEl = document.getElementById('totalData');
+    const totalHadirEl = document.getElementById('totalHadir');
+    const totalSakitEl = document.getElementById('totalSakit');
+    const totalIzinEl = document.getElementById('totalIzin');
+    const totalAlphaEl = document.getElementById('totalAlpha');
+    
+    if (totalDataEl) totalDataEl.textContent = total;
+    if (totalHadirEl) totalHadirEl.textContent = hadir;
+    if (totalSakitEl) totalSakitEl.textContent = sakit;
+    if (totalIzinEl) totalIzinEl.textContent = izin;
+    if (totalAlphaEl) totalAlphaEl.textContent = alpha;
 }
 
 function updateStatisticsPerDosen() {
@@ -352,6 +437,8 @@ function updateStatisticsPerDosen() {
     
     // Render statistik per dosen
     const container = document.getElementById('statsPerDosen');
+    if (!container) return;
+    
     let html = '<div class="stats-dosen-grid">';
     
     for (const [dosen, stats] of Object.entries(statsPerDosen)) {
@@ -396,10 +483,11 @@ function updateStatisticsPerDosen() {
 
 function renderTabel() {
     const tbody = document.getElementById('tbodyAbsensi');
+    if (!tbody) return;
     
     if (filteredData.length === 0) {
         tbody.innerHTML = `<tr class="empty-row">
-            <td colspan="10">
+            <td colspan="9">
                 <div class="empty-state">
                     <span class="empty-icon">📭</span>
                     <p>Tidak ada data absensi</p>
@@ -412,7 +500,6 @@ function renderTabel() {
     
     let html = '';
     filteredData.forEach((absen, index) => {
-        // Potong nama dosen untuk tampilan lebih ringkas
         const dosenShort = absen.dosen.split(',')[0];
         
         html += `
@@ -434,12 +521,66 @@ function renderTabel() {
     tbody.innerHTML = html;
 }
 
+function renderCardView() {
+    const container = document.getElementById('cardView');
+    if (!container) return;
+    
+    if (filteredData.length === 0) {
+        container.innerHTML = `<div class="empty-state">
+            <span class="empty-icon">📭</span>
+            <p>Tidak ada data absensi</p>
+            <small style="color: #999;">Coba ubah filter atau tambah data baru</small>
+        </div>`;
+        return;
+    }
+    
+    let html = '';
+    filteredData.forEach((absen, index) => {
+        const dosenShort = absen.dosen.split(',')[0];
+        html += `
+            <div class="absensi-card">
+                <div class="absensi-card-header">
+                    <span class="absensi-nim">#${absen.nim}</span>
+                    <span class="absensi-tanggal">${absen.tanggalFormatted}</span>
+                </div>
+                <div class="absensi-nama">${absen.nama}</div>
+                <div class="absensi-detail">
+                    <div class="detail-item">
+                        <span class="detail-label">Dosen</span>
+                        <span>${dosenShort}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status</span>
+                        <span>${getBadgeKeteranganSimple(absen.keterangan)}</span>
+                    </div>
+                </div>
+                <div class="absensi-footer">
+                    <span class="absensi-waktu">${absen.waktu}</span>
+                    ${getActionButtonsMobile(absen)}
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
 function getBadgeKeterangan(keterangan) {
     const badges = {
         'Hadir': '<span style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">✅ Hadir</span>',
         'Sakit': '<span style="background: linear-gradient(135deg, #f6d365, #fda085); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">🤒 Sakit</span>',
         'Izin': '<span style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">📋 Izin</span>',
         'Alpha': '<span style="background: linear-gradient(135deg, #fa709a, #fee140); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">❌ Alpha</span>'
+    };
+    return badges[keterangan] || keterangan;
+}
+
+function getBadgeKeteranganSimple(keterangan) {
+    const badges = {
+        'Hadir': '✅ Hadir',
+        'Sakit': '🤒 Sakit',
+        'Izin': '📋 Izin',
+        'Alpha': '❌ Alpha'
     };
     return badges[keterangan] || keterangan;
 }
@@ -451,59 +592,28 @@ function getActionButtons(absen) {
     return '-';
 }
 
+function getActionButtonsMobile(absen) {
+    if (isAdmin) {
+        return `<button class="btn-delete-card" onclick="deleteSingleData(${absen.id})">🗑️ Hapus</button>`;
+    }
+    return '-';
+}
+
 function showAlert(message, type) {
+    // Hapus alert yang sudah ada
+    const existingAlerts = document.querySelectorAll('.alert');
+    existingAlerts.forEach(alert => alert.remove());
+    
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type}`;
     alertDiv.textContent = message;
-    
-    const container = document.querySelector('.form-card');
-    container.insertBefore(alertDiv, container.firstChild);
+    document.body.appendChild(alertDiv);
     
     setTimeout(() => {
         alertDiv.remove();
     }, 3000);
 }
 
-function exportToExcel(data, type) {
-    if (data.length === 0) {
-        showAlert('Tidak ada data untuk diexport', 'error');
-        return;
-    }
-    
-    const excelData = data.map((absen, index) => ({
-        'No': index + 1,
-        'Tanggal': absen.tanggalFormatted || formatTanggalIndonesia(absen.tanggal),
-        'Dosen': absen.dosen,
-        'NIM': absen.nim,
-        'Nama Lengkap': absen.nama,
-        'Program Studi': absen.prodi,
-        'Mata Kuliah': absen.mataKuliah,
-        'Keterangan': absen.keterangan,
-        'Waktu Absensi': absen.waktu
-    }));
-    
-    const ws = XLSX.utils.json_to_sheet(excelData);
-    ws['!cols'] = [
-        {wch:5}, {wch:15}, {wch:35}, {wch:15}, {wch:25}, {wch:20}, {wch:20}, {wch:12}, {wch:12}
-    ];
-    
-    const wb = XLSX.utils.book_new();
-    const sheetName = type === 'semua' ? 'Semua_Data_Absensi' : 'Hasil_Filter_Absensi';
-    XLSX.utils.book_append_sheet(wb, ws, sheetName);
-    
-    const fileName = `Absensi_${getTanggalHariIni()}${type === 'filtered' ? '_filtered' : ''}.xlsx`;
-    XLSX.writeFile(wb, fileName);
-    
-    showAlert(`Berhasil export ${data.length} data ke Excel`, 'success');
-}
-
-// Tampilkan tanggal
-document.getElementById('tanggalHariIni').textContent = formatTanggalDisplay();
-
-// Export functions ke global scope
-window.deleteSingleData = deleteSingleData;
-
-// Fungsi export yang sudah dimodifikasi - HANYA UNTUK ADMIN
 function exportToExcel(data, type) {
     // Cek apakah user adalah admin
     if (!isAdmin) {
@@ -516,60 +626,44 @@ function exportToExcel(data, type) {
         return;
     }
     
-    const excelData = data.map((absen, index) => ({
-        'No': index + 1,
-        'Tanggal': absen.tanggalFormatted || formatTanggalIndonesia(absen.tanggal),
-        'Dosen': absen.dosen,
-        'NIM': absen.nim,
-        'Nama Lengkap': absen.nama,
-        'Program Studi': absen.prodi,
-        'Mata Kuliah': absen.mataKuliah,
-        'Keterangan': absen.keterangan,
-        'Waktu Absensi': absen.waktu
-    }));
-    
-    const ws = XLSX.utils.json_to_sheet(excelData);
-    ws['!cols'] = [
-        {wch:5}, {wch:15}, {wch:35}, {wch:15}, {wch:25}, {wch:20}, {wch:20}, {wch:12}, {wch:12}
-    ];
-    
-    const wb = XLSX.utils.book_new();
-    const sheetName = type === 'semua' ? 'Semua_Data_Absensi' : 'Hasil_Filter_Absensi';
-    XLSX.utils.book_append_sheet(wb, ws, sheetName);
-    
-    const fileName = `Absensi_${getTanggalHariIni()}${type === 'filtered' ? '_filtered' : ''}.xlsx`;
-    XLSX.writeFile(wb, fileName);
-    
-    showAlert(`Berhasil export ${data.length} data ke Excel`, 'success');
+    try {
+        const excelData = data.map((absen, index) => ({
+            'No': index + 1,
+            'Tanggal': absen.tanggalFormatted || formatTanggalIndonesia(absen.tanggal),
+            'Dosen': absen.dosen,
+            'NIM': absen.nim,
+            'Nama Lengkap': absen.nama,
+            'Program Studi': absen.prodi,
+            'Mata Kuliah': absen.mataKuliah,
+            'Keterangan': absen.keterangan,
+            'Waktu Absensi': absen.waktu
+        }));
+        
+        const ws = XLSX.utils.json_to_sheet(excelData);
+        ws['!cols'] = [
+            {wch:5}, {wch:15}, {wch:35}, {wch:15}, {wch:25}, 
+            {wch:20}, {wch:20}, {wch:12}, {wch:12}
+        ];
+        
+        const wb = XLSX.utils.book_new();
+        const sheetName = type === 'semua' ? 'Semua_Data_Absensi' : 'Hasil_Filter_Absensi';
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        
+        const fileName = `Absensi_${getTanggalHariIni()}${type === 'filtered' ? '_filtered' : ''}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+        
+        showAlert(`✅ Berhasil export ${data.length} data ke Excel`, 'success');
+    } catch (error) {
+        showAlert('Terjadi kesalahan saat export data', 'error');
+        console.error('Export error:', error);
+    }
 }
 
-// Modifikasi fungsi updateUserUI dan updateAdminUI
-function updateAdminUI() {
-    document.getElementById('userStatus').innerHTML = '👑 Admin';
-    document.getElementById('userStatus').style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
-    document.getElementById('userStatus').style.color = 'white';
-    document.getElementById('btnLogin').style.display = 'none';
-    document.getElementById('btnLogout').style.display = 'inline-block';
-    document.getElementById('btnReset').style.display = 'flex';
-    
-    // Tampilkan tombol export untuk admin
-    const exportButtons = document.querySelectorAll('.btn-export, .btn-export-filtered');
-    exportButtons.forEach(btn => {
-        btn.style.display = 'flex';
-    });
+// Tampilkan tanggal
+const tanggalHariIniEl = document.getElementById('tanggalHariIni');
+if (tanggalHariIniEl) {
+    tanggalHariIniEl.textContent = formatTanggalDisplay();
 }
 
-function updateUserUI() {
-    document.getElementById('userStatus').innerHTML = '👤 Pengguna';
-    document.getElementById('userStatus').style.background = 'white';
-    document.getElementById('userStatus').style.color = '#667eea';
-    document.getElementById('btnLogin').style.display = 'inline-block';
-    document.getElementById('btnLogout').style.display = 'none';
-    document.getElementById('btnReset').style.display = 'none';
-    
-    // Sembunyikan tombol export untuk non-admin
-    const exportButtons = document.querySelectorAll('.btn-export, .btn-export-filtered');
-    exportButtons.forEach(btn => {
-        btn.style.display = 'none';
-    });
-}
+// Export functions ke global scope
+window.deleteSingleData = deleteSingleData;
