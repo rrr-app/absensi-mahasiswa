@@ -3,7 +3,7 @@
 // Konfigurasi Admin
 const ADMIN_CONFIG = {
     username: 'admin',
-    password: 'admin123'
+    password: 'admin123!@#'
 };
 
 // State
@@ -16,6 +16,15 @@ let isLoading = false;
 const PRODI_TETAP = "Teknik Informatika";
 const MATA_KULIAH_TETAP = "Pemrograman Web";
 
+// Daftar Dosen
+const DAFTAR_DOSEN = [
+    "Prof. Dr. Ahmad Suhendra, M.Kom",
+    "Dr. Rina Fitriana, S.Si., M.T",
+    "Ir. Budi Santoso, M.MSI",
+    "Dian Puspita Sari, S.Kom., M.Cs",
+    "Dr. Eng. Hendra Gunawan, S.T., M.T"
+];
+
 // ============================================
 // FUNGSI LOCALSTORAGE (Penyimpanan Permanen)
 // ============================================
@@ -25,7 +34,7 @@ function loadDataFromLocalStorage() {
     showLoading(true);
     
     try {
-        const storedData = localStorage.getItem('absensi_data');
+        const storedData = localStorage.getItem('absensi_data_dosen');
         
         if (storedData) {
             allAbsensiData = JSON.parse(storedData);
@@ -49,7 +58,7 @@ function loadDataFromLocalStorage() {
 // Simpan data ke localStorage
 function saveDataToLocalStorage() {
     try {
-        localStorage.setItem('absensi_data', JSON.stringify(allAbsensiData));
+        localStorage.setItem('absensi_data_dosen', JSON.stringify(allAbsensiData));
         console.log(`💾 Saved ${allAbsensiData.length} records to localStorage`);
         return true;
     } catch (error) {
@@ -89,10 +98,10 @@ function resetAllAbsensiData() {
     return true;
 }
 
-// Cek duplikasi (NIM + Tanggal)
-function checkDuplicateAbsensi(nim, tanggal) {
+// Cek duplikasi (NIM + Dosen + Tanggal)
+function checkDuplicateAbsensi(nim, dosen, tanggal) {
     return allAbsensiData.some(item => 
-        item.nim === nim && item.tanggal === tanggal
+        item.nim === nim && item.dosen === dosen && item.tanggal === tanggal
     );
 }
 
@@ -139,13 +148,14 @@ async function handleSubmitAbsensi(e) {
     
     const nim = document.getElementById('nim').value.trim();
     const nama = document.getElementById('nama').value.trim();
+    const dosen = document.getElementById('dosen').value;
     const keterangan = document.getElementById('keterangan').value;
     const tanggal = getTanggalHariIni();
     
-    console.log('📝 Form submitted:', { nim, nama, keterangan });
+    console.log('📝 Form submitted:', { nim, nama, dosen, keterangan });
     
     // Validasi
-    if (!nim || !nama || !keterangan) {
+    if (!nim || !nama || !dosen || !keterangan) {
         showAlert('Semua field harus diisi!', 'error');
         return;
     }
@@ -155,10 +165,10 @@ async function handleSubmitAbsensi(e) {
         return;
     }
     
-    // Cek duplikasi (NIM + Tanggal)
-    const isDuplicate = checkDuplicateAbsensi(nim, tanggal);
+    // Cek duplikasi (NIM + Dosen + Tanggal)
+    const isDuplicate = checkDuplicateAbsensi(nim, dosen, tanggal);
     if (isDuplicate) {
-        showAlert(`❌ Mahasiswa dengan NIM ${nim} sudah melakukan absensi hari ini!`, 'error');
+        showAlert(`❌ Mahasiswa dengan NIM ${nim} sudah melakukan absensi untuk dosen ini hari ini!`, 'error');
         return;
     }
     
@@ -168,6 +178,7 @@ async function handleSubmitAbsensi(e) {
         nama: nama,
         prodi: PRODI_TETAP,
         mataKuliah: MATA_KULIAH_TETAP,
+        dosen: dosen,
         keterangan: keterangan,
         waktu: getWaktuSekarang(),
         tanggal: tanggal,
@@ -180,9 +191,11 @@ async function handleSubmitAbsensi(e) {
     showLoading(false);
     
     if (success) {
-        showAlert(`✅ Absensi berhasil untuk ${nama} (${nim})`, 'success');
+        showAlert(`✅ Absensi berhasil untuk ${nama} (${nim}) - ${dosen.split(',')[0]}`, 'success');
         e.target.reset();
         document.getElementById('nim').focus();
+        // Reset dropdown dosen ke default
+        document.getElementById('dosen').value = '';
     }
 }
 
@@ -237,12 +250,14 @@ async function resetAllData() {
 // ============================================
 
 function applyFilters() {
+    const filterDosen = document.getElementById('filterDosen')?.value || 'all';
     const filterKeterangan = document.getElementById('filterKeterangan')?.value || 'all';
     const filterTanggal = document.getElementById('filterTanggal')?.value || '';
     const filterSearch = document.getElementById('filterSearch')?.value.toLowerCase() || '';
     
     filteredData = allAbsensiData.filter(data => {
         let match = true;
+        if (filterDosen !== 'all' && data.dosen !== filterDosen) match = false;
         if (filterKeterangan !== 'all' && data.keterangan !== filterKeterangan) match = false;
         if (filterTanggal && data.tanggal !== filterTanggal) match = false;
         if (filterSearch && !data.nim.includes(filterSearch) && !data.nama.toLowerCase().includes(filterSearch)) match = false;
@@ -253,10 +268,12 @@ function applyFilters() {
     filteredData.sort((a, b) => b.id - a.id);
     
     updateStatistics();
+    updateStatisticsPerDosen();
     renderTabel();
 }
 
 function resetFilters() {
+    document.getElementById('filterDosen').value = 'all';
     document.getElementById('filterKeterangan').value = 'all';
     document.getElementById('filterTanggal').value = '';
     document.getElementById('filterSearch').value = '';
@@ -278,21 +295,82 @@ function updateStatistics() {
     document.getElementById('totalAlpha').textContent = alpha;
 }
 
+function updateStatisticsPerDosen() {
+    const statsPerDosen = {};
+    
+    DAFTAR_DOSEN.forEach(dosen => {
+        statsPerDosen[dosen] = { total: 0, hadir: 0, sakit: 0, izin: 0, alpha: 0 };
+    });
+    
+    filteredData.forEach(data => {
+        if (statsPerDosen[data.dosen]) {
+            statsPerDosen[data.dosen].total++;
+            statsPerDosen[data.dosen][data.keterangan.toLowerCase()]++;
+        }
+    });
+    
+    const container = document.getElementById('statsPerDosen');
+    if (!container) return;
+    
+    let html = '<div class="stats-dosen-grid">';
+    
+    for (const [dosen, stats] of Object.entries(statsPerDosen)) {
+        if (stats.total > 0) {
+            html += `
+                <div class="dosen-stats-card">
+                    <div class="dosen-name">${dosen.split(',')[0]}</div>
+                    <div class="dosen-stats-detail">
+                        <div class="dosen-stat-item">
+                            <span class="dosen-stat-label">Total</span>
+                            <span class="dosen-stat-value">${stats.total}</span>
+                        </div>
+                        <div class="dosen-stat-item">
+                            <span class="dosen-stat-label">Hadir</span>
+                            <span class="dosen-stat-value hadir">${stats.hadir}</span>
+                        </div>
+                        <div class="dosen-stat-item">
+                            <span class="dosen-stat-label">Sakit</span>
+                            <span class="dosen-stat-value sakit">${stats.sakit}</span>
+                        </div>
+                        <div class="dosen-stat-item">
+                            <span class="dosen-stat-label">Izin</span>
+                            <span class="dosen-stat-value izin">${stats.izin}</span>
+                        </div>
+                        <div class="dosen-stat-item">
+                            <span class="dosen-stat-label">Alpha</span>
+                            <span class="dosen-stat-value alpha">${stats.alpha}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    if (html === '<div class="stats-dosen-grid">') {
+        html += '<div class="empty-state" style="grid-column: 1/-1; padding: 20px;"><p>Tidak ada data untuk ditampilkan</p></div>';
+    }
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
 function renderTabel() {
     const tbody = document.getElementById('tbodyAbsensi');
     if (!tbody) return;
     
     if (filteredData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><span class="empty-icon">📭</span><p>Tidak ada data absensi</p><small style="color: #999;">Silakan isi absensi di atas</small></div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><span class="empty-icon">📭</span><p>Tidak ada data absensi</p><small style="color: #999;">Silakan isi absensi di atas</small></div></td></tr>`;
         return;
     }
     
     let html = '';
     filteredData.forEach((absen, index) => {
+        const dosenShort = absen.dosen.split(',')[0];
         html += `
             <tr>
                 <td>${index + 1}</td>
                 <td>${absen.tanggalFormatted}</td>
+                <td title="${absen.dosen}">${dosenShort}</td>
                 <td>${absen.nim}</td>
                 <td>${absen.nama}</td>
                 <td>${getBadgeKeterangan(absen.keterangan)}</td>
@@ -350,6 +428,7 @@ function exportToExcel(data, type) {
         const excelData = data.map((absen, index) => ({
             'No': index + 1,
             'Tanggal': absen.tanggalFormatted,
+            'Dosen': absen.dosen,
             'NIM': absen.nim,
             'Nama Lengkap': absen.nama,
             'Program Studi': absen.prodi,
@@ -360,7 +439,7 @@ function exportToExcel(data, type) {
         
         const ws = XLSX.utils.json_to_sheet(excelData);
         ws['!cols'] = [
-            {wch:5}, {wch:15}, {wch:15}, {wch:25}, {wch:20}, {wch:20}, {wch:12}, {wch:12}
+            {wch:5}, {wch:15}, {wch:35}, {wch:15}, {wch:25}, {wch:20}, {wch:20}, {wch:12}, {wch:12}
         ];
         
         const wb = XLSX.utils.book_new();
@@ -505,10 +584,12 @@ function setupEventListeners() {
     if (btnReset) btnReset.addEventListener('click', resetAllData);
     
     // Filter
+    const filterDosen = document.getElementById('filterDosen');
     const filterKeterangan = document.getElementById('filterKeterangan');
     const filterTanggal = document.getElementById('filterTanggal');
     const filterSearch = document.getElementById('filterSearch');
     
+    if (filterDosen) filterDosen.addEventListener('change', applyFilters);
     if (filterKeterangan) filterKeterangan.addEventListener('change', applyFilters);
     if (filterTanggal) filterTanggal.addEventListener('change', applyFilters);
     if (filterSearch) filterSearch.addEventListener('input', applyFilters);
