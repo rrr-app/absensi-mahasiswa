@@ -27,10 +27,10 @@ let isLoading = false;
 
 // Daftar Dosen
 const DAFTAR_DOSEN = [
-    "Ns. Yunita Galih Yudanari, S.Kep.,M.Kep"
-    "Ns. Puji Lestari, M.Kes (Epid)"
-    "Dr. Ns. Priyanto, M. Kep., Sp. KMB"
-    "M. Imron Rosyidi, S.Kep., Ns., M.Kep."
+    "Ns. Yunita Galih Yudanari, S.Kep.,M.Kep",
+    "Ns. Puji Lestari, M.Kes (Epid)",
+    "Dr. Ns. Priyanto, M. Kep., Sp. KMB",
+    "M. Imron Rosyidi, S.Kep., Ns., M.Kep.",
 
 ];
 
