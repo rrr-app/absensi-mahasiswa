@@ -402,11 +402,9 @@ function renderTabel() {
         html += `
             <tr>
                 <td>${index + 1}</td>
-                <td>${absen.tanggalFormatted}</td>
-                <td title="${absen.dosen}">${dosenShort}</td>
-                <td>${absen.nim}</td>
                 <td>${absen.nama}</td>
-                <td>${getBadgeKeterangan(absen.keterangan)}</td>
+                <td>${absen.nim}</td>
+                <td>${absen.tanggal}</td>
                 <td>${absen.waktu}</td>
                 <td>${getActionButtons(absen)}</td>
             </tr>
@@ -460,13 +458,9 @@ function exportToExcel(data, type) {
     try {
         const excelData = data.map((absen, index) => ({
             'No': index + 1,
-            'Tanggal': absen.tanggalFormatted,
-            'Dosen': absen.dosen,
-            'NIM': absen.nim,
             'Nama Lengkap': absen.nama,
-            'Program Studi': absen.prodi,
-            'Mata Kuliah': absen.mataKuliah,
-            'Keterangan': absen.keterangan,
+            'NIM': absen.nim,
+            'Tanggal': absen.tanggal,
             'Waktu Absensi': absen.waktu
         }));
         
