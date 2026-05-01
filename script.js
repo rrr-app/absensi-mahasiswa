@@ -3,7 +3,7 @@
 // Konfigurasi Admin
 const ADMIN_CONFIG = {
     username: 'admin',
-    password: 'admin123'
+    password: 'admin123!@#'
 };
 
 // State
