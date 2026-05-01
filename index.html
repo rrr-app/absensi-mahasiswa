@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absensi Mata Kuliah Inovasi Pelayanan Kesehatan</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="bg-gradient"></div>
+    </div>
+    
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="icon-wrapper">
+                        <span class="icon">📋</span>
+                    </div>
+                    <div>
+                        <h1>Absensi Mata Kuliah Inovasi Pelayanan Kesehatan</h1>
+                        <p class="subtitle">Universitas Ngudi Waluyo</p>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <div class="user-badge">
+                        <span id="userStatus">👤 Pengguna</span>
+                    </div>
+                    <button id="btnLogin" class="btn-glass">🔐 Login Admin</button>
+                    <button id="btnLogout" class="btn-glass-outline" style="display:none;">🚪 Logout</button>
+                </div>
+            </div>
+            <div class="date-card">
+                <div class="date-icon">📅</div>
+                <div class="date-text">
+                    <span class="date-label">Hari Ini</span>
+                    <span class="date-value" id="tanggalHariIni"></span>
+                </div>
+            </div>
+        </header>
+
+        <div class="form-card">
+            <div class="card-header">
+                <div class="card-icon">✍️</div>
+                <h2>Form Absensi Mahasiswa</h2>
+            </div>
+            <form id="formAbsensi">
+                <div class="form-group">
+                    <label for="nim">
+                        <span class="label-icon">🎓</span>
+                        Nomor Induk Mahasiswa (NIM)
+                    </label>
+                    <input type="text" id="nim" name="nim" required placeholder="Masukkan NIM (angka)" maxlength="15">
+                </div>
+
+                <div class="form-group">
+                    <label for="nama">
+                        <span class="label-icon">👨‍🎓</span>
+                        Nama Lengkap
+                    </label>
+                    <input type="text" id="nama" name="nama" required placeholder="Masukkan nama lengkap">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dosen">
+                            <span class="label-icon">👨‍🏫</span>
+                            Pilih Dosen
+                        </label>
+                        <select id="dosen" required>
+                            <option value="">Pilih Dosen</option>
+                            <option value="Prof. Dr. Ahmad Suhendra, M.Kom">👨‍🏫 Ns. Yunita Galih Yudanari, S.Kep.,M.Kep</option>
+                            <option value="Dr. Rina Fitriana, S.Si., M.T">👩‍🏫 Ns. Puji Lestari, M.Kes (Epid)</option>
+                            <option value="Ir. Budi Santoso, M.MSI">👨‍🏫 Dr. Ns. Priyanto, M. Kep., Sp. KMB</option>
+                            <option value="Dian Puspita Sari, S.Kom., M.Cs">👩‍🏫 M. Imron Rosyidi, S.Kep., Ns., M.Kep.</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="keterangan">
+                            <span class="label-icon">📝</span>
+                            Keterangan
+                        </label>
+                        <select id="keterangan" required>
+                            <option value="Hadir">✅ Hadir</option>
+                            <option value="Sakit">🤒 Sakit</option>
+                            <option value="Izin">📋 Izin</option>
+                            <option value="Alpha">❌ Alpha</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="prodi">
+                        <span class="label-icon">🏫</span>
+                        Program Studi
+                    </label>
+                    <input type="text" id="prodi" value="S1-Keperawatan" readonly disabled style="background: #f0f0f0; cursor: not-allowed;">
+                    <input type="hidden" id="prodi_hidden" value="S1-Keperawatan">
+                </div>
+                
+                <div class="form-group">
+                    <label for="mataKuliah">
+                        <span class="label-icon">📖</span>
+                        Mata Kuliah
+                    </label>
+                    <input type="text" id="mataKuliah" value="Inovasi Pelayanan Kesehatan" readonly disabled style="background: #f0f0f0; cursor: not-allowed;">
+                    <input type="hidden" id="mataKuliah_hidden" value="Inovasi Pelayanan Kesehatan">
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <span class="btn-icon">✅</span>
+                    Simpan Absensi
+                </button>
+            </form>
+        </div>
+
+        <div class="data-card">
+            <div class="card-header">
+                <div class="card-icon">📊</div>
+                <h2>Data Absensi Mahasiswa</h2>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-header">
+                    <span class="filter-icon">🔍</span>
+                    <h3>Filter Data</h3>
+                </div>
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label>Dosen:</label>
+                        <select id="filterDosen">
+                            <option value="all">Semua Dosen</option>
+                            <option value="Prof. Dr. Ahmad Suhendra, M.Kom">Prof. Dr. Ahmad Suhendra, M.Kom</option>
+                            <option value="Dr. Rina Fitriana, S.Si., M.T">Dr. Rina Fitriana, S.Si., M.T</option>
+                            <option value="Ir. Budi Santoso, M.MSI">Ir. Budi Santoso, M.MSI</option>
+                            <option value="Dian Puspita Sari, S.Kom., M.Cs">Dian Puspita Sari, S.Kom., M.Cs</option>
+                            <option value="Dr. Eng. Hendra Gunawan, S.T., M.T">Dr. Eng. Hendra Gunawan, S.T., M.T</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Keterangan:</label>
+                        <select id="filterKeterangan">
+                            <option value="all">Semua Keterangan</option>
+                            <option value="Hadir">Hadir</option>
+                            <option value="Sakit">Sakit</option>
+                            <option value="Izin">Izin</option>
+                            <option value="Alpha">Alpha</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Tanggal:</label>
+                        <input type="date" id="filterTanggal">
+                    </div>
+                    <div class="filter-group">
+                        <label>Cari NIM/Nama:</label>
+                        <input type="text" id="filterSearch" placeholder="Ketik NIM atau Nama">
+                    </div>
+                    <button id="btnResetFilter" class="btn-filter reset">⟳ Reset Filter</button>
+                </div>
+            </div>
+
+            <!-- Statistics by Dosen -->
+            <div class="stats-dosen-section">
+                <h3>📊 Statistik Kehadiran per Dosen</h3>
+                <div id="statsPerDosen" class="stats-dosen-grid"></div>
+            </div>
+
+            <div class="button-group-header">
+                <div class="stats-bar" id="statsBar">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Data</span>
+                        <span class="stat-value" id="totalData">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Hadir</span>
+                        <span class="stat-value hadir" id="totalHadir">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Sakit</span>
+                        <span class="stat-value sakit" id="totalSakit">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Izin</span>
+                        <span class="stat-value izin" id="totalIzin">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Alpha</span>
+                        <span class="stat-value alpha" id="totalAlpha">0</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button id="btnExport" class="btn-export">
+                        <span class="btn-icon">📊</span>
+                        Export Semua Data
+                    </button>
+                    <button id="btnExportFiltered" class="btn-export-filtered">
+                        <span class="btn-icon">📋</span>
+                        Export Hasil Filter
+                    </button>
+                    <button id="btnReset" class="btn-reset" style="display:none;">
+                        <span class="btn-icon">🗑️</span>
+                        Reset Semua Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table id="tabelAbsensi">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Tanggal</th>
+                            <th>Dosen</th>
+                            <th>NIM</th>
+                            <th>Nama</th>
+                            <th>Program Studi</th>
+                            <th>Mata Kuliah</th>
+                            <th>Keterangan</th>
+                            <th>Waktu</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyAbsensi">
+                        <tr class="empty-row">
+                            <td colspan="10">
+                                <div class="empty-state">
+                                    <span class="empty-icon">📭</span>
+                                    <p>Belum ada data absensi</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Login -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon">🔐</div>
+                <h2>Login Admin</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">
+                            <span class="label-icon">👤</span>
+                            Username
+                        </label>
+                        <input type="text" id="username" required placeholder="Masukkan username admin">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">
+                            <span class="label-icon">🔒</span>
+                            Password
+                        </label>
+                        <input type="password" id="password" required placeholder="Masukkan password">
+                    </div>
+                    <button type="submit" class="btn-submit">
+                        <span class="btn-icon">🚀</span>
+                        Login
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+	
+	<!-- Modifikasi bagian action-buttons -->
+	<div class="action-buttons">
+		<button id="btnExport" class="btn-export" style="display:none;">
+			<span class="btn-icon">📊</span>
+			Export Semua Data
+		</button>
+		<button id="btnExportFiltered" class="btn-export-filtered" style="display:none;">
+			<span class="btn-icon">📋</span>
+			Export Hasil Filter
+		</button>
+		<button id="btnReset" class="btn-reset" style="display:none;">
+			<span class="btn-icon">🗑️</span>
+			Reset Semua Data
+		</button>
+	</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
