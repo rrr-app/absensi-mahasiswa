@@ -198,8 +198,10 @@ function showLoading(show) {
 
 function getTanggalHariIni() {
     const today = new Date();
-    const options = { day: 'numeric', month: 'long', year: 'numeric' };
-    return today.toLocaleDateString('id-ID', options);
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 function formatTanggalDisplay() {
@@ -227,7 +229,7 @@ async function handleSubmitAbsensi(e) {
     const nama = document.getElementById('nama').value.trim();
     const dosen = document.getElementById('dosen').value;
     const keterangan = document.getElementById('keterangan').value;
-    const tanggal = getTanggalHariIni();
+    const tanggal = getWaktuSekarang();
     
     console.log('📝 Form submitted:', { nim, nama, dosen, keterangan });
     
