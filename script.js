@@ -208,10 +208,10 @@ function formatTanggalDisplay() {
     return new Date().toLocaleDateString('id-ID', { timeZone: 'Asia/Makassar', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-function formatTanggalIndonesia(tanggalString) {
-    if (tanggalString) {
+function formatTanggalIndonesia(tanggal) {
+    if (tanggal) {
         // tanggalString format YYYY-MM-DD
-        const [year, month, day] = tanggalString.split('-');
+        const [year, month, day] = tanggal.split('-');
         const date = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
         return date.toLocaleDateString('id-ID', { timeZone: 'Asia/Makassar', day: 'numeric', month: 'long', year: 'numeric' });
     } else {
@@ -259,7 +259,7 @@ async function handleSubmitAbsensi(e) {
         keterangan: keterangan,
         waktu: getWaktuSekarang(),
         tanggal: tanggal,
-        tanggal_formatted: formatTanggalIndonesia(tanggalString)
+        tanggal_formatted: formatTanggalIndonesia(tanggal)
     };
     
     // Simpan
