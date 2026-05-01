@@ -402,7 +402,7 @@ function renderTabel() {
                 <td>${index + 1}</td>
                 <td>${absen.nama}</td>
                 <td>${absen.nim}</td>
-                <td>${absen.tanggalFormatted || formatTanggalIndonesia(absen.tanggal)}</td>
+                <td>${absen.tanggalFormatted}</td>
                 <td>${absen.waktu}</td>
                 <td>${getActionButtons(absen)}</td>
             </tr>
