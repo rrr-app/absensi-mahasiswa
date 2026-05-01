@@ -1,15 +1,22 @@
 // config.js
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwufW0R8WsyPbW6hfvOamw7YEdTRd27Q8oh_pLFxinfhJuQ4UfJoLuHvaPvtFW4hzRp/exec';
-// File konfigurasi untuk aplikasi absensi
-const APP_CONFIG = {
-    appName: 'Aplikasi Absensi Mahasiswa',
-    version: '1.0.0',
-    prodi: 'Teknik Informatika',
-    mataKuliah: 'Pemrograman Web'
-};
+// Ganti URL ini dengan URL Web App Google Apps Script Anda!
 
-console.log('📋 Aplikasi Absensi Mahasiswa v1.0.0');
-console.log('Program Studi:', APP_CONFIG.prodi);
-console.log('Mata Kuliah:', APP_CONFIG.mataKuliah);
-console.log('🚀 Config loaded!');
-console.log('URL:', GOOGLE_SCRIPT_URL);
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+
+// Nilai tetap
+const PRODI_TETAP = "Teknik Informatika";
+const MATA_KULIAH_TETAP = "Pemrograman Web";
+
+// Daftar Dosen
+const DAFTAR_DOSEN = [
+    "Prof. Dr. Ahmad Suhendra, M.Kom",
+    "Dr. Rina Fitriana, S.Si., M.T",
+    "Ir. Budi Santoso, M.MSI",
+    "Dian Puspita Sari, S.Kom., M.Cs",
+    "Dr. Eng. Hendra Gunawan, S.T., M.T"
+];
+
+console.log('📋 Aplikasi Absensi Mahasiswa v1.0');
+console.log('Google Script URL:', GOOGLE_SCRIPT_URL);
+console.log('Program Studi:', PRODI_TETAP);
+console.log('Mata Kuliah:', MATA_KULIAH_TETAP);
