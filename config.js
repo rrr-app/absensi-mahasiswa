@@ -4,16 +4,15 @@
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyfcvoLaBu3cOYwbbnRgwuhLCTazgaOankooBgVWb5z2hR3zstZnLhLDtczoqK6U_8b/exec';
 
 // Nilai tetap
-const PRODI_TETAP = "Teknik Informatika";
-const MATA_KULIAH_TETAP = "Pemrograman Web";
+const PRODI_TETAP = "S1-Keperawatan";
+const MATA_KULIAH_TETAP = "Inovasi Pelayanan Kesehatan";
 
 // Daftar Dosen
 const DAFTAR_DOSEN = [
-    "Prof. Dr. Ahmad Suhendra, M.Kom",
-    "Dr. Rina Fitriana, S.Si., M.T",
-    "Ir. Budi Santoso, M.MSI",
-    "Dian Puspita Sari, S.Kom., M.Cs",
-    "Dr. Eng. Hendra Gunawan, S.T., M.T"
+    "Ns. Yunita Galih Yudanari, S.Kep.,M.Kep",
+    "Ns. Puji Lestari, M.Kes (Epid)",
+    "Dr. Ns. Priyanto, M. Kep., Sp. KMB",
+    "M. Imron Rosyidi, S.Kep., Ns., M.Kep."
 ];
 
 console.log('📋 Aplikasi Absensi Mahasiswa v1.0');
