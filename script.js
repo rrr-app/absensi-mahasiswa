@@ -18,38 +18,55 @@ const DAFTAR_DOSEN = [
     "Dr. Eng. Hendra Gunawan, S.T., M.T"
 ];
 
-// Inisialisasi
+// Inisialisasi - HANYA LOAD DATA, TIDAK ADA POPUP
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
-    checkSession(); // Hanya cek session, TIDAK membuka modal otomatis
+    checkSession(); // Hanya cek session, TIDAK membuka modal
     setupEventListeners();
     setupFilterListeners();
+    
+    // Pastikan modal tersembunyi saat load
+    const modal = document.getElementById('loginModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 });
 
 function setupEventListeners() {
-    document.getElementById('formAbsensi').addEventListener('submit', handleSubmitAbsensi);
-    document.getElementById('btnExport').addEventListener('click', () => exportToExcel(allAbsensiData, 'semua'));
-    document.getElementById('btnExportFiltered').addEventListener('click', () => exportToExcel(filteredData, 'filtered'));
-    document.getElementById('btnLogin').addEventListener('click', showLoginModal); // Modal hanya terbuka saat tombol ditekan
-    document.getElementById('btnLogout').addEventListener('click', handleLogout);
-    document.getElementById('btnReset').addEventListener('click', resetAllData);
-    document.getElementById('btnResetFilter').addEventListener('click', resetFilters);
+    const formAbsensi = document.getElementById('formAbsensi');
+    const btnExport = document.getElementById('btnExport');
+    const btnExportFiltered = document.getElementById('btnExportFiltered');
+    const btnLogin = document.getElementById('btnLogin');
+    const btnLogout = document.getElementById('btnLogout');
+    const btnReset = document.getElementById('btnReset');
+    const btnResetFilter = document.getElementById('btnResetFilter');
     
+    if (formAbsensi) formAbsensi.addEventListener('submit', handleSubmitAbsensi);
+    if (btnExport) btnExport.addEventListener('click', () => exportToExcel(allAbsensiData, 'semua'));
+    if (btnExportFiltered) btnExportFiltered.addEventListener('click', () => exportToExcel(filteredData, 'filtered'));
+    if (btnLogin) btnLogin.addEventListener('click', showLoginModal); // HANYA INI YANG MEMBUKA MODAL
+    if (btnLogout) btnLogout.addEventListener('click', handleLogout);
+    if (btnReset) btnReset.addEventListener('click', resetAllData);
+    if (btnResetFilter) btnResetFilter.addEventListener('click', resetFilters);
+    
+    // Modal close events
     const modal = document.getElementById('loginModal');
-    const closeBtn = document.getElementsByClassName('close')[0];
+    const closeBtn = document.querySelector('.close');
     
-    // Hanya set close button, tidak membuka modal otomatis
     if (closeBtn) {
-        closeBtn.onclick = () => modal.style.display = 'none';
+        closeBtn.onclick = () => {
+            if (modal) modal.style.display = 'none';
+        };
     }
     
     window.onclick = (event) => {
         if (event.target === modal) {
-            modal.style.display = 'none';
+            if (modal) modal.style.display = 'none';
         }
     };
     
-    document.getElementById('loginForm').addEventListener('submit', handleLogin);
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) loginForm.addEventListener('submit', handleLogin);
 }
 
 function setupFilterListeners() {
@@ -65,18 +82,24 @@ function setupFilterListeners() {
 }
 
 function checkSession() {
-    // Hanya cek session, TIDAK membuka modal otomatis
+    // HANYA cek session, TIDAK membuka modal
     const savedSession = localStorage.getItem('adminSession');
     if (savedSession) {
-        const session = JSON.parse(savedSession);
-        const sessionTime = new Date(session.timestamp);
-        const now = new Date();
-        const hoursDiff = (now - sessionTime) / (1000 * 60 * 60);
-        
-        if (hoursDiff < 24) {
-            isAdmin = true;
-            updateAdminUI();
-        } else {
+        try {
+            const session = JSON.parse(savedSession);
+            const sessionTime = new Date(session.timestamp);
+            const now = new Date();
+            const hoursDiff = (now - sessionTime) / (1000 * 60 * 60);
+            
+            if (hoursDiff < 24) {
+                isAdmin = true;
+                updateAdminUI();
+            } else {
+                localStorage.removeItem('adminSession');
+                isAdmin = false;
+                updateUserUI();
+            }
+        } catch (e) {
             localStorage.removeItem('adminSession');
             isAdmin = false;
             updateUserUI();
@@ -85,11 +108,10 @@ function checkSession() {
         isAdmin = false;
         updateUserUI();
     }
-    updateUIByRole();
 }
 
 function updateAdminUI() {
-    // Update UI Admin (Desktop)
+    // Update UI Admin
     const userStatus = document.getElementById('userStatus');
     if (userStatus) {
         userStatus.innerHTML = '👑 Admin';
@@ -106,14 +128,14 @@ function updateAdminUI() {
     if (btnReset) btnReset.style.display = 'flex';
     
     // Tampilkan tombol export untuk admin
-    const exportButtons = document.querySelectorAll('.btn-export, .btn-export-filtered');
-    exportButtons.forEach(btn => {
-        btn.style.display = 'flex';
-    });
+    const btnExport = document.getElementById('btnExport');
+    const btnExportFiltered = document.getElementById('btnExportFiltered');
+    if (btnExport) btnExport.style.display = 'flex';
+    if (btnExportFiltered) btnExportFiltered.style.display = 'flex';
 }
 
 function updateUserUI() {
-    // Update UI User (Desktop)
+    // Update UI User
     const userStatus = document.getElementById('userStatus');
     if (userStatus) {
         userStatus.innerHTML = '👤 Pengguna';
@@ -130,30 +152,24 @@ function updateUserUI() {
     if (btnReset) btnReset.style.display = 'none';
     
     // Sembunyikan tombol export untuk non-admin
-    const exportButtons = document.querySelectorAll('.btn-export, .btn-export-filtered');
-    exportButtons.forEach(btn => {
-        btn.style.display = 'none';
-    });
-}
-
-function updateUIByRole() {
-    if (isAdmin) {
-        updateAdminUI();
-    } else {
-        updateUserUI();
-    }
+    const btnExport = document.getElementById('btnExport');
+    const btnExportFiltered = document.getElementById('btnExportFiltered');
+    if (btnExport) btnExport.style.display = 'none';
+    if (btnExportFiltered) btnExportFiltered.style.display = 'none';
 }
 
 function showLoginModal() {
-    // Modal hanya terbuka saat tombol login ditekan
+    // HANYA dipanggil saat tombol login ditekan
     const modal = document.getElementById('loginModal');
     if (modal) {
         modal.style.display = 'block';
         // Reset form
-        document.getElementById('loginForm').reset();
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) loginForm.reset();
         // Focus ke username
         setTimeout(() => {
-            document.getElementById('username').focus();
+            const usernameInput = document.getElementById('username');
+            if (usernameInput) usernameInput.focus();
         }, 100);
     }
 }
@@ -178,16 +194,17 @@ function handleLogin(e) {
         if (modal) modal.style.display = 'none';
         
         // Reset form
-        document.getElementById('loginForm').reset();
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) loginForm.reset();
         
         showAlert('Login berhasil! Selamat datang Admin.', 'success');
         
-        // Refresh tampilan data (menampilkan tombol hapus)
+        // Refresh tampilan data
         renderTabel();
-        renderCardView(); // Jika menggunakan card view
     } else {
         showAlert('Username atau password salah!', 'error');
-        document.getElementById('password').value = '';
+        const passwordInput = document.getElementById('password');
+        if (passwordInput) passwordInput.value = '';
     }
 }
 
@@ -197,14 +214,10 @@ function handleLogout() {
         localStorage.removeItem('adminSession');
         updateUserUI();
         showAlert('Anda telah logout dari mode admin.', 'success');
-        
-        // Refresh tampilan data (menyembunyikan tombol hapus)
         renderTabel();
-        renderCardView(); // Jika menggunakan card view
     }
 }
 
-// Fungsi lainnya tetap sama seperti sebelumnya
 function getTanggalHariIni() {
     const today = new Date();
     const year = today.getFullYear();
@@ -234,7 +247,11 @@ function loadData() {
     const storedData = localStorage.getItem('absensi_permanen_dosen');
     
     if (storedData) {
-        allAbsensiData = JSON.parse(storedData);
+        try {
+            allAbsensiData = JSON.parse(storedData);
+        } catch (e) {
+            allAbsensiData = [];
+        }
     } else {
         allAbsensiData = [];
     }
@@ -276,7 +293,7 @@ function handleSubmitAbsensi(e) {
     }
     
     if (isNimAlreadyAbsentTodayForDosen(nim, dosen, tanggal)) {
-        showAlert(`❌ Mahasiswa dengan NIM ${nim} sudah melakukan absensi untuk dosen ${dosen} hari ini!`, 'error');
+        showAlert(`❌ Mahasiswa dengan NIM ${nim} sudah melakukan absensi untuk dosen ini hari ini!`, 'error');
         return;
     }
     
@@ -296,10 +313,11 @@ function handleSubmitAbsensi(e) {
     allAbsensiData.push(absensiBaru);
     saveData();
     applyFilters();
-    showAlert(`✅ Absensi berhasil untuk ${nama} (${nim}) - Dosen: ${dosen.split(',')[0]}`, 'success');
+    showAlert(`✅ Absensi berhasil untuk ${nama} (${nim})`, 'success');
     
     e.target.reset();
-    document.getElementById('nim').focus();
+    const nimInput = document.getElementById('nim');
+    if (nimInput) nimInput.focus();
 }
 
 function deleteSingleData(id) {
@@ -375,7 +393,6 @@ function applyFilters() {
     updateStatistics();
     updateStatisticsPerDosen();
     renderTabel();
-    renderCardView(); // Jika menggunakan card view
 }
 
 function resetFilters() {
@@ -487,7 +504,7 @@ function renderTabel() {
     
     if (filteredData.length === 0) {
         tbody.innerHTML = `<tr class="empty-row">
-            <td colspan="9">
+            <td colspan="10">
                 <div class="empty-state">
                     <span class="empty-icon">📭</span>
                     <p>Tidak ada data absensi</p>
@@ -521,50 +538,6 @@ function renderTabel() {
     tbody.innerHTML = html;
 }
 
-function renderCardView() {
-    const container = document.getElementById('cardView');
-    if (!container) return;
-    
-    if (filteredData.length === 0) {
-        container.innerHTML = `<div class="empty-state">
-            <span class="empty-icon">📭</span>
-            <p>Tidak ada data absensi</p>
-            <small style="color: #999;">Coba ubah filter atau tambah data baru</small>
-        </div>`;
-        return;
-    }
-    
-    let html = '';
-    filteredData.forEach((absen, index) => {
-        const dosenShort = absen.dosen.split(',')[0];
-        html += `
-            <div class="absensi-card">
-                <div class="absensi-card-header">
-                    <span class="absensi-nim">#${absen.nim}</span>
-                    <span class="absensi-tanggal">${absen.tanggalFormatted}</span>
-                </div>
-                <div class="absensi-nama">${absen.nama}</div>
-                <div class="absensi-detail">
-                    <div class="detail-item">
-                        <span class="detail-label">Dosen</span>
-                        <span>${dosenShort}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Status</span>
-                        <span>${getBadgeKeteranganSimple(absen.keterangan)}</span>
-                    </div>
-                </div>
-                <div class="absensi-footer">
-                    <span class="absensi-waktu">${absen.waktu}</span>
-                    ${getActionButtonsMobile(absen)}
-                </div>
-            </div>
-        `;
-    });
-    
-    container.innerHTML = html;
-}
-
 function getBadgeKeterangan(keterangan) {
     const badges = {
         'Hadir': '<span style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">✅ Hadir</span>',
@@ -575,26 +548,9 @@ function getBadgeKeterangan(keterangan) {
     return badges[keterangan] || keterangan;
 }
 
-function getBadgeKeteranganSimple(keterangan) {
-    const badges = {
-        'Hadir': '✅ Hadir',
-        'Sakit': '🤒 Sakit',
-        'Izin': '📋 Izin',
-        'Alpha': '❌ Alpha'
-    };
-    return badges[keterangan] || keterangan;
-}
-
 function getActionButtons(absen) {
     if (isAdmin) {
         return `<button class="btn-delete" onclick="deleteSingleData(${absen.id})">🗑️ Hapus</button>`;
-    }
-    return '-';
-}
-
-function getActionButtonsMobile(absen) {
-    if (isAdmin) {
-        return `<button class="btn-delete-card" onclick="deleteSingleData(${absen.id})">🗑️ Hapus</button>`;
     }
     return '-';
 }
@@ -610,7 +566,9 @@ function showAlert(message, type) {
     document.body.appendChild(alertDiv);
     
     setTimeout(() => {
-        alertDiv.remove();
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
     }, 3000);
 }
 
