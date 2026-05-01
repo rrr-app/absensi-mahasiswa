@@ -5,13 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Aplikasi Absensi Mahasiswa | Mobile</title>
+    <title>Aplikasi Absensi Mahasiswa | Online dengan Supabase</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Menyinkronkan data...</p>
+    </div>
+
     <div class="bg-animation">
         <div class="bg-gradient"></div>
     </div>
@@ -25,7 +31,7 @@
                     </div>
                     <div>
                         <h1>Aplikasi Absensi Mahasiswa</h1>
-                        <p class="subtitle">Mata Kuliah: Pemrograman Web | Sistem Absensi Per Dosen</p>
+                        <p class="subtitle">Mata Kuliah: Pemrograman Web | Online dengan Supabase</p>
                     </div>
                 </div>
                 <div class="user-info">
@@ -75,11 +81,11 @@
                         </label>
                         <select id="dosen" required>
                             <option value="">Pilih Dosen</option>
-                            <option value="Prof. Dr. Ahmad Suhendra, M.Kom">👨‍🏫 Prof. Dr. Ahmad Suhendra, M.Kom</option>
-                            <option value="Dr. Rina Fitriana, S.Si., M.T">👩‍🏫 Dr. Rina Fitriana, S.Si., M.T</option>
-                            <option value="Ir. Budi Santoso, M.MSI">👨‍🏫 Ir. Budi Santoso, M.MSI</option>
-                            <option value="Dian Puspita Sari, S.Kom., M.Cs">👩‍🏫 Dian Puspita Sari, S.Kom., M.Cs</option>
-                            <option value="Dr. Eng. Hendra Gunawan, S.T., M.T">👨‍🏫 Dr. Eng. Hendra Gunawan, S.T., M.T</option>
+                            <option value="Prof. Dr. Ahmad Suhendra, M.Kom">Prof. Dr. Ahmad Suhendra, M.Kom</option>
+                            <option value="Dr. Rina Fitriana, S.Si., M.T">Dr. Rina Fitriana, S.Si., M.T</option>
+                            <option value="Ir. Budi Santoso, M.MSI">Ir. Budi Santoso, M.MSI</option>
+                            <option value="Dian Puspita Sari, S.Kom., M.Cs">Dian Puspita Sari, S.Kom., M.Cs</option>
+                            <option value="Dr. Eng. Hendra Gunawan, S.T., M.T">Dr. Eng. Hendra Gunawan, S.T., M.T</option>
                         </select>
                     </div>
 
@@ -126,6 +132,7 @@
             <div class="card-header">
                 <div class="card-icon">📊</div>
                 <h2>Data Absensi Mahasiswa</h2>
+                <button id="btnRefresh" class="btn-refresh" title="Refresh Data">🔄</button>
             </div>
 
             <!-- Filter Section -->
@@ -234,7 +241,7 @@
                             <td colspan="10">
                                 <div class="empty-state">
                                     <span class="empty-icon">📭</span>
-                                    <p>Belum ada data absensi</p>
+                                    <p>Memuat data...</p>
                                 </div>
                             </td>
                         </tr>
@@ -244,7 +251,7 @@
         </div>
     </div>
 
-    <!-- Modal Login - PASTIKAN TIDAK ADA CLASS 'active' atau 'show' -->
+    <!-- Modal Login -->
     <div id="loginModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -255,23 +262,14 @@
             <div class="modal-body">
                 <form id="loginForm">
                     <div class="form-group">
-                        <label for="username">
-                            <span class="label-icon">👤</span>
-                            Username
-                        </label>
-                        <input type="text" id="username" required placeholder="Masukkan username admin">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" required placeholder="Username admin">
                     </div>
                     <div class="form-group">
-                        <label for="password">
-                            <span class="label-icon">🔒</span>
-                            Password
-                        </label>
-                        <input type="password" id="password" required placeholder="Masukkan password">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required placeholder="Password">
                     </div>
-                    <button type="submit" class="btn-submit">
-                        <span class="btn-icon">🚀</span>
-                        Login
-                    </button>
+                    <button type="submit" class="btn-submit">Login</button>
                 </form>
             </div>
         </div>
