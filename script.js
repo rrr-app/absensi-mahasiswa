@@ -206,7 +206,7 @@ function getTanggalHariIni() {
 
 function formatTanggalDisplay() {
     const today = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
     return today.toLocaleDateString('id-ID', options);
 }
 
