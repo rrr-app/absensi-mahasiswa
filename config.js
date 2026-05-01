@@ -1,7 +1,7 @@
 // config.js
 // Ganti URL ini dengan URL Web App Google Apps Script Anda!
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHh7Vk18Ej4DiKh_3eP5_gfGOAOGfjdhY2ZJuuXIZzou1EWfdtbKPDyvzXozUj8RTp/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyfcvoLaBu3cOYwbbnRgwuhLCTazgaOankooBgVWb5z2hR3zstZnLhLDtczoqK6U_8b/exec';
 
 // Nilai tetap
 const PRODI_TETAP = "Teknik Informatika";
