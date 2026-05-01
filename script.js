@@ -1,16 +1,10 @@
-// script.js - Versi dengan debugging lengkap
-
-// ============================================
-// AMBIL KONFIGURASI DARI FILE TERPISAH
-// ============================================
-// Pastikan config.js sudah dipanggil sebelumnya
+// script.js - Versi dengan Google Spreadsheet
 
 // State
 let allAbsensiData = [];
 let filteredData = [];
 let isAdmin = false;
 let isLoading = false;
-let dbConnected = false;
 
 // Daftar Dosen
 const DAFTAR_DOSEN = [
@@ -22,55 +16,43 @@ const DAFTAR_DOSEN = [
 ];
 
 // ============================================
-// FUNGSI DATABASE
+// FUNGSI API GOOGLE SHEETS
 // ============================================
 
-// Test koneksi dan load data
-async function initDatabase() {
-    showLoading(true);
-    
-    console.log('========================================');
-    console.log('🚀 MEMULAI INISIALISASI DATABASE');
-    console.log('========================================');
-    
-    // Test koneksi
-    const connected = await testConnection();
-    dbConnected = connected;
-    
-    if (!connected) {
-        console.error('❌ Gagal terhubung ke Supabase!');
-        showAlert('⚠️ Gagal terhubung ke database!\n\nPeriksa:\n1. Koneksi internet\n2. Credentials Supabase di config.js\n3. Cek console browser (F12)', 'error');
-        showLoading(false);
+async function callGoogleScript(action, data = {}) {
+    try {
+        const params = new URLSearchParams({
+            action: action,
+            ...data
+        });
         
-        // Gunakan localStorage sebagai fallback
-        loadFromLocalStorage();
-        return;
+        const url = `${GOOGLE_SCRIPT_URL}?${params.toString()}`;
+        console.log(`📡 Calling Google Script: ${action}`, url);
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors'
+        });
+        
+        const result = await response.json();
+        console.log(`📡 Response:`, result);
+        
+        return result;
+    } catch (error) {
+        console.error(`❌ Error calling ${action}:`, error);
+        return { success: false, error: error.message };
     }
-    
-    // Load data dari Supabase
-    await loadFromSupabase();
-    showLoading(false);
 }
 
-// Load dari Supabase
-async function loadFromSupabase() {
-    console.log('📥 Loading data dari Supabase...');
+// Load data dari Google Sheets
+async function loadDataFromGoogle() {
+    showLoading(true);
     
     try {
-        const { data, error } = await supabase
-            .from('absensi')
-            .select('*')
-            .order('created_at', { ascending: false });
+        const result = await callGoogleScript('getData');
         
-        if (error) {
-            console.error('❌ Error loading:', error);
-            throw error;
-        }
-        
-        console.log(`✅ Loaded ${data?.length || 0} records`);
-        
-        if (data && data.length > 0) {
-            allAbsensiData = data.map(item => ({
+        if (result.success && result.data) {
+            allAbsensiData = result.data.map(item => ({
                 id: item.id,
                 nim: item.nim,
                 nama: item.nama,
@@ -82,90 +64,78 @@ async function loadFromSupabase() {
                 tanggal: item.tanggal,
                 tanggalFormatted: item.tanggal_formatted
             }));
+            console.log(`✅ Loaded ${allAbsensiData.length} records`);
         } else {
+            console.error('Load failed:', result.error);
             allAbsensiData = [];
-            console.log('📭 Database kosong');
         }
         
         applyFilters();
-        
     } catch (error) {
-        console.error('❌ Load failed:', error);
-        showAlert('Gagal memuat data: ' + error.message, 'error');
+        console.error('Error loading data:', error);
+        showAlert('Gagal memuat data!', 'error');
         allAbsensiData = [];
         applyFilters();
+    } finally {
+        showLoading(false);
     }
 }
 
-// Simpan ke Supabase
-async function saveToSupabase(absensiData) {
-    console.log('💾 Menyimpan data ke Supabase...');
-    console.log('Data:', absensiData);
+// Simpan data ke Google Sheets
+async function saveDataToGoogle(absensiData) {
+    showLoading(true);
     
     try {
-        const { data, error } = await supabase
-            .from('absensi')
-            .insert({
-                nim: absensiData.nim,
-                nama: absensiData.nama,
-                prodi: absensiData.prodi,
-                mata_kuliah: absensiData.mataKuliah,
-                dosen: absensiData.dosen,
-                keterangan: absensiData.keterangan,
-                waktu: absensiData.waktu,
-                tanggal: absensiData.tanggal,
-                tanggal_formatted: absensiData.tanggalFormatted
-            })
-            .select();
+        const result = await callGoogleScript('addData', {
+            data: JSON.stringify(absensiData)
+        });
         
-        if (error) {
-            console.error('❌ Insert error:', error);
-            throw error;
-        }
-        
-        if (data && data[0]) {
-            console.log('✅ Data berhasil disimpan! ID:', data[0].id);
-            
-            const newData = {
-                id: data[0].id,
-                ...absensiData
-            };
-            
-            allAbsensiData.unshift(newData);
-            applyFilters();
+        if (result.success) {
+            // Refresh data setelah save
+            await loadDataFromGoogle();
+            showAlert('✅ Data berhasil disimpan!', 'success');
             return true;
+        } else {
+            throw new Error(result.error);
         }
-        
-        return false;
-        
     } catch (error) {
-        console.error('❌ Save failed:', error);
-        showAlert('Gagal menyimpan: ' + error.message, 'error');
+        console.error('Save error:', error);
+        showAlert('Gagal menyimpan data: ' + error.message, 'error');
         return false;
+    } finally {
+        showLoading(false);
     }
 }
 
-// Hapus dari Supabase
-async function deleteFromSupabase(id) {
-    console.log('🗑️ Menghapus data ID:', id);
+// Hapus data dari Google Sheets
+async function deleteDataFromGoogle(nim, tanggal, dosen) {
+    if (!isAdmin) {
+        showAlert('Hanya admin yang dapat menghapus data!', 'error');
+        return false;
+    }
+    
+    showLoading(true);
     
     try {
-        const { error } = await supabase
-            .from('absensi')
-            .delete()
-            .eq('id', id);
+        const result = await callGoogleScript('deleteData', {
+            nim: nim,
+            tanggal: tanggal,
+            dosen: dosen
+        });
         
-        if (error) throw error;
-        
-        console.log('✅ Data berhasil dihapus');
-        allAbsensiData = allAbsensiData.filter(item => item.id !== id);
-        applyFilters();
-        return true;
-        
+        if (result.success) {
+            await loadDataFromGoogle();
+            showAlert('✅ Data berhasil dihapus!', 'success');
+            return true;
+        } else {
+            throw new Error(result.error);
+        }
     } catch (error) {
-        console.error('❌ Delete failed:', error);
-        showAlert('Gagal menghapus: ' + error.message, 'error');
+        console.error('Delete error:', error);
+        showAlert('Gagal menghapus data!', 'error');
         return false;
+    } finally {
+        showLoading(false);
     }
 }
 
@@ -183,64 +153,36 @@ async function resetAllData() {
     showLoading(true);
     
     try {
-        const { error } = await supabase
-            .from('absensi')
-            .delete()
-            .neq('id', 0);
+        const result = await callGoogleScript('resetData');
         
-        if (error) throw error;
-        
-        console.log('✅ Semua data direset');
-        allAbsensiData = [];
-        applyFilters();
-        showAlert('Semua data telah direset!', 'success');
-        
+        if (result.success) {
+            await loadDataFromGoogle();
+            showAlert('✅ Semua data telah direset!', 'success');
+        } else {
+            throw new Error(result.error);
+        }
     } catch (error) {
-        console.error('❌ Reset failed:', error);
-        showAlert('Gagal mereset data: ' + error.message, 'error');
+        console.error('Reset error:', error);
+        showAlert('Gagal mereset data!', 'error');
     } finally {
         showLoading(false);
     }
 }
 
 // Cek duplikasi
-async function checkDuplicate(nim, dosen, tanggal) {
+async function checkDuplicateFromGoogle(nim, tanggal, dosen) {
     try {
-        const { data, error } = await supabase
-            .from('absensi')
-            .select('id')
-            .eq('nim', nim)
-            .eq('dosen', dosen)
-            .eq('tanggal', tanggal)
-            .limit(1);
+        const result = await callGoogleScript('checkDuplicate', {
+            nim: nim,
+            tanggal: tanggal,
+            dosen: dosen
+        });
         
-        if (error) throw error;
-        
-        return data && data.length > 0;
-        
+        return result.success && result.isDuplicate;
     } catch (error) {
         console.error('Duplicate check error:', error);
         return false;
     }
-}
-
-// ============================================
-// FALLBACK: LOCAL STORAGE
-// ============================================
-
-function loadFromLocalStorage() {
-    console.log('📦 Fallback: Loading dari localStorage');
-    const storedData = localStorage.getItem('absensi_local');
-    if (storedData) {
-        allAbsensiData = JSON.parse(storedData);
-    } else {
-        allAbsensiData = [];
-    }
-    applyFilters();
-}
-
-function saveToLocalStorage(data) {
-    localStorage.setItem('absensi_local', JSON.stringify(data));
 }
 
 // ============================================
@@ -280,10 +222,7 @@ function formatTanggalIndonesia(tanggal) {
     return date.toLocaleDateString('id-ID', options);
 }
 
-// ============================================
-// HANDLE SUBMIT ABSENSI
-// ============================================
-
+// Handle submit absensi
 async function handleSubmitAbsensi(e) {
     e.preventDefault();
     
@@ -308,13 +247,10 @@ async function handleSubmitAbsensi(e) {
         return;
     }
     
-    showLoading(true);
-    
     // Cek duplikasi
-    const isDuplicate = await checkDuplicate(nim, dosen, tanggal);
+    const isDuplicate = await checkDuplicateFromGoogle(nim, tanggal, dosen);
     if (isDuplicate) {
         showAlert(`❌ NIM ${nim} sudah absen untuk dosen ini hari ini!`, 'error');
-        showLoading(false);
         return;
     }
     
@@ -323,60 +259,29 @@ async function handleSubmitAbsensi(e) {
         nim: nim,
         nama: nama,
         prodi: prodi,
-        mataKuliah: mataKuliah,
+        mata_kuliah: mataKuliah,
         dosen: dosen,
         keterangan: keterangan,
         waktu: getWaktuSekarang(),
         tanggal: tanggal,
-        tanggalFormatted: formatTanggalIndonesia(tanggal)
+        tanggal_formatted: formatTanggalIndonesia(tanggal)
     };
     
-    // Simpan ke Supabase (atau localStorage jika offline)
-    let success = false;
-    if (dbConnected) {
-        success = await saveToSupabase(absensiData);
-    } else {
-        // Fallback ke localStorage
-        absensiData.id = Date.now();
-        allAbsensiData.unshift(absensiData);
-        saveToLocalStorage(allAbsensiData);
-        applyFilters();
-        success = true;
-        showAlert('✅ Data disimpan (mode offline)', 'success');
-    }
+    // Simpan
+    const success = await saveDataToGoogle(absensiData);
     
     if (success) {
         e.target.reset();
         document.getElementById('nim').focus();
     }
-    
-    showLoading(false);
 }
 
-// ============================================
-// DELETE DATA
-// ============================================
-
+// Delete data
 async function deleteSingleData(id) {
-    if (!isAdmin) {
-        showAlert('Hanya admin yang dapat menghapus data!', 'error');
-        return;
-    }
+    const dataToDelete = allAbsensiData.find(item => item.id === id);
+    if (!dataToDelete) return;
     
-    if (!confirm('Hapus data ini?')) return;
-    
-    showLoading(true);
-    
-    if (dbConnected) {
-        await deleteFromSupabase(id);
-    } else {
-        allAbsensiData = allAbsensiData.filter(item => item.id !== id);
-        saveToLocalStorage(allAbsensiData);
-        applyFilters();
-        showAlert('Data dihapus (mode offline)', 'success');
-    }
-    
-    showLoading(false);
+    await deleteDataFromGoogle(dataToDelete.nim, dataToDelete.tanggal, dataToDelete.dosen);
 }
 
 // ============================================
@@ -635,7 +540,7 @@ function setupEventListeners() {
     document.getElementById('btnLogin').addEventListener('click', showLoginModal);
     document.getElementById('btnLogout').addEventListener('click', handleLogout);
     document.getElementById('btnResetFilter').addEventListener('click', resetFilters);
-    document.getElementById('btnRefresh').addEventListener('click', () => initDatabase());
+    document.getElementById('btnRefresh').addEventListener('click', () => loadDataFromGoogle());
     document.getElementById('btnExport').addEventListener('click', () => exportToExcel(allAbsensiData, 'semua'));
     document.getElementById('btnExportFiltered').addEventListener('click', () => exportToExcel(filteredData, 'filtered'));
     document.getElementById('btnReset').addEventListener('click', () => resetAllData());
@@ -643,13 +548,19 @@ function setupEventListeners() {
     // Filter
     ['filterDosen', 'filterKeterangan', 'filterTanggal', 'filterSearch'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.addEventListener('change', applyFilters);
-        if (id === 'filterSearch' && el) el.addEventListener('input', applyFilters);
+        if (el) {
+            if (id === 'filterSearch') {
+                el.addEventListener('input', applyFilters);
+            } else {
+                el.addEventListener('change', applyFilters);
+            }
+        }
     });
     
     // Modal close
     const modal = document.getElementById('loginModal');
-    document.querySelector('.close').onclick = () => modal.style.display = 'none';
+    const closeBtn = document.querySelector('.close');
+    if (closeBtn) closeBtn.onclick = () => modal.style.display = 'none';
     window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
 }
@@ -657,10 +568,13 @@ function setupEventListeners() {
 // Start aplikasi
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Aplikasi dimulai...');
+    console.log('Google Script URL:', GOOGLE_SCRIPT_URL);
+    
     setupEventListeners();
     checkSession();
     document.getElementById('tanggalHariIni').textContent = formatTanggalDisplay();
-    await initDatabase();
+    await loadDataFromGoogle();
+    
     console.log('✅ Aplikasi siap');
 });
 
