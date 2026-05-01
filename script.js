@@ -1,3 +1,13 @@
+// ============================================
+// KONFIGURASI SUPABASE
+// GANTI DENGAN CREDENTIALS ANDA DARI SUPABASE!
+// ============================================
+const SUPABASE_URL = 'https://ezctveawnkzfiuwkqfwj.supabase.co';  // Ganti dengan URL Project Anda
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6Y3R2ZWF3bmt6Zml1d2txZndqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2Mjk0NjAsImV4cCI6MjA5MzIwNTQ2MH0.Xr-yZoJLAvAp_vWYH1msePEBZJeodRxDMEjK0t-yk_k';  // Ganti dengan Anon Key Anda
+
+// Inisialisasi Supabase Client
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // Konfigurasi Admin
 const ADMIN_CONFIG = {
     username: 'admin',
@@ -8,6 +18,7 @@ const ADMIN_CONFIG = {
 let allAbsensiData = [];
 let filteredData = [];
 let isAdmin = false;
+let isLoading = false;
 
 // Daftar Dosen
 const DAFTAR_DOSEN = [
@@ -18,14 +29,207 @@ const DAFTAR_DOSEN = [
     "Dr. Eng. Hendra Gunawan, S.T., M.T"
 ];
 
-// Inisialisasi - HANYA LOAD DATA, TIDAK ADA POPUP
-document.addEventListener('DOMContentLoaded', () => {
-    loadData();
-    checkSession(); // Hanya cek session, TIDAK membuka modal
+// ============================================
+// FUNGSI DATABASE SUPABASE
+// ============================================
+
+// Load data dari Supabase
+async function loadDataFromSupabase() {
+    showLoading(true);
+    
+    try {
+        const { data, error } = await supabase
+            .from('absensi')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        if (data) {
+            allAbsensiData = data.map(item => ({
+                id: item.id,
+                nim: item.nim,
+                nama: item.nama,
+                prodi: item.prodi,
+                mataKuliah: item.mata_kuliah,
+                dosen: item.dosen,
+                keterangan: item.keterangan,
+                waktu: item.waktu,
+                tanggal: item.tanggal,
+                tanggalFormatted: item.tanggal_formatted
+            }));
+            
+            console.log(`Data loaded: ${allAbsensiData.length} records`);
+        }
+        
+        applyFilters();
+    } catch (error) {
+        console.error('Error loading data:', error);
+        showAlert('Gagal memuat data dari server! Periksa koneksi internet Anda.', 'error');
+        allAbsensiData = [];
+        applyFilters();
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Simpan data ke Supabase
+async function saveDataToSupabase(absensiBaru) {
+    showLoading(true);
+    
+    try {
+        const { data, error } = await supabase
+            .from('absensi')
+            .insert([
+                {
+                    nim: absensiBaru.nim,
+                    nama: absensiBaru.nama,
+                    prodi: absensiBaru.prodi,
+                    mata_kuliah: absensiBaru.mataKuliah,
+                    dosen: absensiBaru.dosen,
+                    keterangan: absensiBaru.keterangan,
+                    waktu: absensiBaru.waktu,
+                    tanggal: absensiBaru.tanggal,
+                    tanggal_formatted: absensiBaru.tanggalFormatted
+                }
+            ])
+            .select();
+        
+        if (error) throw error;
+        
+        if (data && data[0]) {
+            absensiBaru.id = data[0].id;
+            allAbsensiData.unshift(absensiBaru);
+            applyFilters();
+            showAlert('✅ Data berhasil disimpan ke server!', 'success');
+            return true;
+        }
+        
+        return false;
+    } catch (error) {
+        console.error('Error saving data:', error);
+        showAlert('Gagal menyimpan data! Periksa koneksi internet Anda.', 'error');
+        return false;
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Hapus data dari Supabase
+async function deleteDataFromSupabase(id) {
+    if (!isAdmin) {
+        showAlert('Hanya admin yang dapat menghapus data!', 'error');
+        return false;
+    }
+    
+    showLoading(true);
+    
+    try {
+        const { error } = await supabase
+            .from('absensi')
+            .delete()
+            .eq('id', id);
+        
+        if (error) throw error;
+        
+        allAbsensiData = allAbsensiData.filter(item => item.id !== id);
+        applyFilters();
+        showAlert('Data berhasil dihapus!', 'success');
+        return true;
+    } catch (error) {
+        console.error('Error deleting data:', error);
+        showAlert('Gagal menghapus data!', 'error');
+        return false;
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Reset semua data (hapus semua)
+async function resetAllDataFromSupabase() {
+    if (!isAdmin) {
+        showAlert('⚠️ Hanya admin yang dapat mereset data!', 'error');
+        return false;
+    }
+    
+    if (allAbsensiData.length === 0) {
+        showAlert('Tidak ada data untuk direset', 'error');
+        return false;
+    }
+    
+    if (!confirm('⚠️ PERINGATAN: Anda akan menghapus SEMUA data absensi! Tindakan ini tidak dapat dibatalkan. Apakah Anda yakin?')) {
+        return false;
+    }
+    
+    showLoading(true);
+    
+    try {
+        const { error } = await supabase
+            .from('absensi')
+            .delete()
+            .neq('id', 0); // Hapus semua
+        
+        if (error) throw error;
+        
+        allAbsensiData = [];
+        applyFilters();
+        showAlert('Semua data absensi telah direset!', 'success');
+        return true;
+    } catch (error) {
+        console.error('Error resetting data:', error);
+        showAlert('Gagal mereset data!', 'error');
+        return false;
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Cek duplikasi absensi di database (berdasarkan NIM + Dosen + Tanggal)
+async function checkDuplicateAbsensi(nim, dosen, tanggal) {
+    try {
+        const { data, error } = await supabase
+            .from('absensi')
+            .select('id')
+            .eq('nim', nim)
+            .eq('dosen', dosen)
+            .eq('tanggal', tanggal)
+            .limit(1);
+        
+        if (error) throw error;
+        
+        return data && data.length > 0;
+    } catch (error) {
+        console.error('Error checking duplicate:', error);
+        return false;
+    }
+}
+
+// ============================================
+// FUNGSI UTAMA APLIKASI
+// ============================================
+
+function showLoading(show) {
+    isLoading = show;
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.style.display = show ? 'flex' : 'none';
+    }
+}
+
+// Inisialisasi
+document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
     setupFilterListeners();
+    checkSession();
+    await loadDataFromSupabase(); // Load data dari Supabase
     
-    // Pastikan modal tersembunyi saat load
+    // Tampilkan tanggal
+    const tanggalHariIniEl = document.getElementById('tanggalHariIni');
+    if (tanggalHariIniEl) {
+        tanggalHariIniEl.textContent = formatTanggalDisplay();
+    }
+    
+    // Pastikan modal tersembunyi
     const modal = document.getElementById('loginModal');
     if (modal) {
         modal.style.display = 'none';
@@ -40,14 +244,19 @@ function setupEventListeners() {
     const btnLogout = document.getElementById('btnLogout');
     const btnReset = document.getElementById('btnReset');
     const btnResetFilter = document.getElementById('btnResetFilter');
+    const btnRefresh = document.getElementById('btnRefresh');
     
     if (formAbsensi) formAbsensi.addEventListener('submit', handleSubmitAbsensi);
     if (btnExport) btnExport.addEventListener('click', () => exportToExcel(allAbsensiData, 'semua'));
     if (btnExportFiltered) btnExportFiltered.addEventListener('click', () => exportToExcel(filteredData, 'filtered'));
-    if (btnLogin) btnLogin.addEventListener('click', showLoginModal); // HANYA INI YANG MEMBUKA MODAL
+    if (btnLogin) btnLogin.addEventListener('click', showLoginModal);
     if (btnLogout) btnLogout.addEventListener('click', handleLogout);
-    if (btnReset) btnReset.addEventListener('click', resetAllData);
+    if (btnReset) btnReset.addEventListener('click', () => resetAllDataFromSupabase());
     if (btnResetFilter) btnResetFilter.addEventListener('click', resetFilters);
+    if (btnRefresh) btnRefresh.addEventListener('click', async () => {
+        await loadDataFromSupabase();
+        showAlert('Data berhasil direfresh!', 'success');
+    });
     
     // Modal close events
     const modal = document.getElementById('loginModal');
@@ -82,7 +291,6 @@ function setupFilterListeners() {
 }
 
 function checkSession() {
-    // HANYA cek session, TIDAK membuka modal
     const savedSession = localStorage.getItem('adminSession');
     if (savedSession) {
         try {
@@ -111,7 +319,6 @@ function checkSession() {
 }
 
 function updateAdminUI() {
-    // Update UI Admin
     const userStatus = document.getElementById('userStatus');
     if (userStatus) {
         userStatus.innerHTML = '👑 Admin';
@@ -127,7 +334,6 @@ function updateAdminUI() {
     if (btnLogout) btnLogout.style.display = 'inline-block';
     if (btnReset) btnReset.style.display = 'flex';
     
-    // Tampilkan tombol export untuk admin
     const btnExport = document.getElementById('btnExport');
     const btnExportFiltered = document.getElementById('btnExportFiltered');
     if (btnExport) btnExport.style.display = 'flex';
@@ -135,7 +341,6 @@ function updateAdminUI() {
 }
 
 function updateUserUI() {
-    // Update UI User
     const userStatus = document.getElementById('userStatus');
     if (userStatus) {
         userStatus.innerHTML = '👤 Pengguna';
@@ -151,7 +356,6 @@ function updateUserUI() {
     if (btnLogout) btnLogout.style.display = 'none';
     if (btnReset) btnReset.style.display = 'none';
     
-    // Sembunyikan tombol export untuk non-admin
     const btnExport = document.getElementById('btnExport');
     const btnExportFiltered = document.getElementById('btnExportFiltered');
     if (btnExport) btnExport.style.display = 'none';
@@ -159,14 +363,11 @@ function updateUserUI() {
 }
 
 function showLoginModal() {
-    // HANYA dipanggil saat tombol login ditekan
     const modal = document.getElementById('loginModal');
     if (modal) {
         modal.style.display = 'block';
-        // Reset form
         const loginForm = document.getElementById('loginForm');
         if (loginForm) loginForm.reset();
-        // Focus ke username
         setTimeout(() => {
             const usernameInput = document.getElementById('username');
             if (usernameInput) usernameInput.focus();
@@ -174,7 +375,7 @@ function showLoginModal() {
     }
 }
 
-function handleLogin(e) {
+async function handleLogin(e) {
     e.preventDefault();
     
     const username = document.getElementById('username').value;
@@ -189,17 +390,13 @@ function handleLogin(e) {
         localStorage.setItem('adminSession', JSON.stringify(session));
         updateAdminUI();
         
-        // Tutup modal
         const modal = document.getElementById('loginModal');
         if (modal) modal.style.display = 'none';
         
-        // Reset form
         const loginForm = document.getElementById('loginForm');
         if (loginForm) loginForm.reset();
         
         showAlert('Login berhasil! Selamat datang Admin.', 'success');
-        
-        // Refresh tampilan data
         renderTabel();
     } else {
         showAlert('Username atau password salah!', 'error');
@@ -243,35 +440,7 @@ function formatTanggalIndonesia(tanggal) {
     return date.toLocaleDateString('id-ID', options);
 }
 
-function loadData() {
-    const storedData = localStorage.getItem('absensi_permanen_dosen');
-    
-    if (storedData) {
-        try {
-            allAbsensiData = JSON.parse(storedData);
-        } catch (e) {
-            allAbsensiData = [];
-        }
-    } else {
-        allAbsensiData = [];
-    }
-    
-    applyFilters();
-}
-
-function saveData() {
-    localStorage.setItem('absensi_permanen_dosen', JSON.stringify(allAbsensiData));
-}
-
-function isNimAlreadyAbsentTodayForDosen(nim, dosen, tanggal) {
-    return allAbsensiData.some(absen => 
-        absen.nim === nim && 
-        absen.tanggal === tanggal && 
-        absen.dosen === dosen
-    );
-}
-
-function handleSubmitAbsensi(e) {
+async function handleSubmitAbsensi(e) {
     e.preventDefault();
     
     const nim = document.getElementById('nim').value.trim();
@@ -292,13 +461,14 @@ function handleSubmitAbsensi(e) {
         return;
     }
     
-    if (isNimAlreadyAbsentTodayForDosen(nim, dosen, tanggal)) {
+    // Cek duplikasi di Supabase
+    const isDuplicate = await checkDuplicateAbsensi(nim, dosen, tanggal);
+    if (isDuplicate) {
         showAlert(`❌ Mahasiswa dengan NIM ${nim} sudah melakukan absensi untuk dosen ini hari ini!`, 'error');
         return;
     }
     
     const absensiBaru = {
-        id: Date.now(),
         nim: nim,
         nama: nama,
         prodi: prodi,
@@ -310,48 +480,16 @@ function handleSubmitAbsensi(e) {
         tanggalFormatted: formatTanggalIndonesia(tanggal)
     };
     
-    allAbsensiData.push(absensiBaru);
-    saveData();
-    applyFilters();
-    showAlert(`✅ Absensi berhasil untuk ${nama} (${nim})`, 'success');
-    
-    e.target.reset();
-    const nimInput = document.getElementById('nim');
-    if (nimInput) nimInput.focus();
-}
-
-function deleteSingleData(id) {
-    if (!isAdmin) {
-        showAlert('Hanya admin yang dapat menghapus data!', 'error');
-        return;
-    }
-    
-    if (confirm('Apakah Anda yakin ingin menghapus data absensi ini?')) {
-        const dataToDelete = allAbsensiData.find(item => item.id === id);
-        allAbsensiData = allAbsensiData.filter(item => item.id !== id);
-        saveData();
-        applyFilters();
-        showAlert(`Data absensi ${dataToDelete.nama} berhasil dihapus`, 'success');
+    const success = await saveDataToSupabase(absensiBaru);
+    if (success) {
+        e.target.reset();
+        const nimInput = document.getElementById('nim');
+        if (nimInput) nimInput.focus();
     }
 }
 
-function resetAllData() {
-    if (!isAdmin) {
-        showAlert('⚠️ Hanya admin yang dapat mereset data! Silakan login sebagai admin.', 'error');
-        return;
-    }
-    
-    if (allAbsensiData.length === 0) {
-        showAlert('Tidak ada data untuk direset', 'error');
-        return;
-    }
-    
-    if (confirm('⚠️ PERINGATAN: Anda akan menghapus SEMUA data absensi! Tindakan ini tidak dapat dibatalkan. Apakah Anda yakin?')) {
-        allAbsensiData = [];
-        saveData();
-        applyFilters();
-        showAlert('Semua data absensi telah direset', 'success');
-    }
+async function deleteSingleData(id) {
+    await deleteDataFromSupabase(id);
 }
 
 function applyFilters() {
@@ -368,26 +506,14 @@ function applyFilters() {
     filteredData = allAbsensiData.filter(data => {
         let match = true;
         
-        if (filterDosenValue !== 'all' && data.dosen !== filterDosenValue) {
-            match = false;
-        }
-        
-        if (filterKeteranganValue !== 'all' && data.keterangan !== filterKeteranganValue) {
-            match = false;
-        }
-        
-        if (filterTanggalValue && data.tanggal !== filterTanggalValue) {
-            match = false;
-        }
-        
-        if (filterSearchValue && !data.nim.includes(filterSearchValue) && !data.nama.toLowerCase().includes(filterSearchValue)) {
-            match = false;
-        }
+        if (filterDosenValue !== 'all' && data.dosen !== filterDosenValue) match = false;
+        if (filterKeteranganValue !== 'all' && data.keterangan !== filterKeteranganValue) match = false;
+        if (filterTanggalValue && data.tanggal !== filterTanggalValue) match = false;
+        if (filterSearchValue && !data.nim.includes(filterSearchValue) && !data.nama.toLowerCase().includes(filterSearchValue)) match = false;
         
         return match;
     });
     
-    // Urutkan berdasarkan tanggal terbaru
     filteredData.sort((a, b) => b.id - a.id);
     
     updateStatistics();
@@ -433,18 +559,10 @@ function updateStatistics() {
 function updateStatisticsPerDosen() {
     const statsPerDosen = {};
     
-    // Inisialisasi statistik untuk setiap dosen
     DAFTAR_DOSEN.forEach(dosen => {
-        statsPerDosen[dosen] = {
-            total: 0,
-            hadir: 0,
-            sakit: 0,
-            izin: 0,
-            alpha: 0
-        };
+        statsPerDosen[dosen] = { total: 0, hadir: 0, sakit: 0, izin: 0, alpha: 0 };
     });
     
-    // Hitung statistik berdasarkan data yang ditampilkan (filtered)
     filteredData.forEach(data => {
         if (statsPerDosen[data.dosen]) {
             statsPerDosen[data.dosen].total++;
@@ -452,7 +570,6 @@ function updateStatisticsPerDosen() {
         }
     });
     
-    // Render statistik per dosen
     const container = document.getElementById('statsPerDosen');
     if (!container) return;
     
@@ -508,9 +625,9 @@ function renderTabel() {
                 <div class="empty-state">
                     <span class="empty-icon">📭</span>
                     <p>Tidak ada data absensi</p>
-                    <small style="color: #999;">Coba ubah filter atau tambah data baru</small>
+                    <small style="color: #999;">Silakan isi absensi di atas</small>
                 </div>
-            </td>
+            <tr>
         </tr>`;
         return;
     }
@@ -556,7 +673,6 @@ function getActionButtons(absen) {
 }
 
 function showAlert(message, type) {
-    // Hapus alert yang sudah ada
     const existingAlerts = document.querySelectorAll('.alert');
     existingAlerts.forEach(alert => alert.remove());
     
@@ -573,7 +689,6 @@ function showAlert(message, type) {
 }
 
 function exportToExcel(data, type) {
-    // Cek apakah user adalah admin
     if (!isAdmin) {
         showAlert('⚠️ Fitur export hanya dapat digunakan oleh admin! Silakan login sebagai admin terlebih dahulu.', 'error');
         return;
@@ -598,17 +713,9 @@ function exportToExcel(data, type) {
         }));
         
         const ws = XLSX.utils.json_to_sheet(excelData);
-        ws['!cols'] = [
-            {wch:5}, {wch:15}, {wch:35}, {wch:15}, {wch:25}, 
-            {wch:20}, {wch:20}, {wch:12}, {wch:12}
-        ];
-        
         const wb = XLSX.utils.book_new();
-        const sheetName = type === 'semua' ? 'Semua_Data_Absensi' : 'Hasil_Filter_Absensi';
-        XLSX.utils.book_append_sheet(wb, ws, sheetName);
-        
-        const fileName = `Absensi_${getTanggalHariIni()}${type === 'filtered' ? '_filtered' : ''}.xlsx`;
-        XLSX.writeFile(wb, fileName);
+        XLSX.utils.book_append_sheet(wb, ws, 'Absensi');
+        XLSX.writeFile(wb, `Absensi_${getTanggalHariIni()}.xlsx`);
         
         showAlert(`✅ Berhasil export ${data.length} data ke Excel`, 'success');
     } catch (error) {
@@ -617,11 +724,5 @@ function exportToExcel(data, type) {
     }
 }
 
-// Tampilkan tanggal
-const tanggalHariIniEl = document.getElementById('tanggalHariIni');
-if (tanggalHariIniEl) {
-    tanggalHariIniEl.textContent = formatTanggalDisplay();
-}
-
-// Export functions ke global scope
+// Global functions
 window.deleteSingleData = deleteSingleData;
