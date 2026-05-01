@@ -1,1183 +1,669 @@
-:root {
-    --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    --gradient-4: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-    --gradient-5: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-    --gradient-soft: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
-    --gradient-card: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.98) 100%);
-    --shadow-sm: 0 10px 30px rgba(0,0,0,0.1);
-    --shadow-md: 0 20px 40px rgba(0,0,0,0.15);
-    --shadow-lg: 0 30px 60px rgba(0,0,0,0.2);
-    --shadow-hover: 0 25px 50px -12px rgba(0,0,0,0.25);
-    --border-radius: 20px;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-    position: relative;
-    overflow-x: hidden;
-}
-
-/* Background Animation */
-.bg-animation {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -2;
-    overflow: hidden;
-}
-
-.bg-gradient {
-    position: absolute;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(125deg, 
-        #667eea 0%, 
-        #764ba2 25%, 
-        #f093fb 50%, 
-        #4facfe 75%, 
-        #43e97b 100%);
-    animation: gradientShift 15s ease infinite;
-    filter: blur(60px);
-    opacity: 0.3;
-}
-
-@keyframes gradientShift {
-    0% { transform: translate(0%, 0%) rotate(0deg); }
-    25% { transform: translate(-25%, -25%) rotate(90deg); }
-    50% { transform: translate(-50%, -50%) rotate(180deg); }
-    75% { transform: translate(-25%, -25%) rotate(270deg); }
-    100% { transform: translate(0%, 0%) rotate(360deg); }
-}
-
-.container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 30px;
-    position: relative;
-    z-index: 1;
-}
-
-/* Header Styles */
-header {
-    margin-bottom: 40px;
-}
-
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
-.logo-section {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.icon-wrapper {
-    width: 60px;
-    height: 60px;
-    background: var(--gradient-1);
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: var(--shadow-sm);
-    animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-}
-
-.icon-wrapper .icon {
-    font-size: 2.5em;
-}
-
-.logo-section h1 {
-    font-size: 1.8em;
-    background: var(--gradient-1);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    margin-bottom: 5px;
-}
-
-.subtitle {
-    color: #666;
-    font-size: 0.9em;
-}
-
-.user-info {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-}
-
-.user-badge {
-    background: rgba(255,255,255,0.9);
-    backdrop-filter: blur(10px);
-    padding: 8px 16px;
-    border-radius: 50px;
-    box-shadow: var(--shadow-sm);
-}
-
-.user-badge span {
-    font-weight: 600;
-    color: #667eea;
-}
-
-.btn-glass, .btn-glass-outline {
-    padding: 8px 20px;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-}
-
-.btn-glass {
-    background: var(--gradient-1);
-    color: white;
-    box-shadow: var(--shadow-sm);
-}
-
-.btn-glass:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
-}
-
-.btn-glass-outline {
-    background: rgba(220, 53, 69, 0.9);
-    color: white;
-    backdrop-filter: blur(10px);
-}
-
-.btn-glass-outline:hover {
-    background: rgba(220, 53, 69, 1);
-    transform: translateY(-2px);
-}
-
-/* Date Card */
-.date-card {
-    background: var(--gradient-card);
-    display: inline-flex;
-    align-items: center;
-    gap: 15px;
-    padding: 15px 25px;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-sm);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.3);
-}
-
-.date-icon {
-    font-size: 2em;
-}
-
-.date-text {
-    display: flex;
-    flex-direction: column;
-}
-
-.date-label {
-    font-size: 0.8em;
-    color: #999;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.date-value {
-    font-size: 1.2em;
-    font-weight: 600;
-    color: #667eea;
-}
-
-/* Cards */
-.form-card, .data-card {
-    background: var(--gradient-card);
-    backdrop-filter: blur(10px);
-    border-radius: var(--border-radius);
-    padding: 30px;
-    margin-bottom: 30px;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.3s ease;
-    border: 1px solid rgba(255,255,255,0.3);
-}
-
-.form-card:hover, .data-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-hover);
-}
-
-.card-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 25px;
-}
-
-.card-icon {
-    width: 45px;
-    height: 45px;
-    background: var(--gradient-1);
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5em;
-    color: white;
-}
-
-.card-header h2 {
-    flex: 1;
-    color: #333;
-    font-size: 1.5em;
-}
-
-.button-group {
-    display: flex;
-    gap: 10px;
-}
-
-/* Filter Section */
-.filter-section {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
-    border-radius: 15px;
-    padding: 20px;
-    margin-bottom: 25px;
-}
-
-.filter-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.filter-icon {
-    font-size: 1.2em;
-}
-
-.filter-header h3 {
-    color: #667eea;
-    font-size: 1.1em;
-}
-
-.filter-controls {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    align-items: end;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.filter-group label {
-    font-size: 12px;
-    color: #999;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.filter-group select,
-.filter-group input {
-    padding: 10px;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
-    font-family: 'Inter', sans-serif;
-    transition: all 0.3s ease;
-}
-
-.filter-group select:focus,
-.filter-group input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.btn-filter {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.btn-filter.reset {
-    background: #6c757d;
-    color: white;
-}
-
-.btn-filter.reset:hover {
-    background: #5a6268;
-    transform: translateY(-2px);
-}
-
-/* Statistics by Dosen */
-.stats-dosen-section {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
-    border-radius: 15px;
-    padding: 20px;
-    margin-bottom: 25px;
-}
-
-.stats-dosen-section h3 {
-    color: #667eea;
-    margin-bottom: 15px;
-    font-size: 1.1em;
-}
-
-.stats-dosen-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 15px;
-}
-
-.dosen-stats-card {
-    background: white;
-    border-radius: 12px;
-    padding: 15px;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.3s ease;
-}
-
-.dosen-stats-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-hover);
-}
-
-.dosen-name {
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 10px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid #667eea;
-    font-size: 0.9em;
-}
-
-.dosen-stats-detail {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    text-align: center;
-}
-
-.dosen-stat-item {
-    text-align: center;
-}
-
-.dosen-stat-label {
-    font-size: 10px;
-    color: #999;
-    display: block;
-}
-
-.dosen-stat-value {
-    font-size: 18px;
-    font-weight: 700;
-    display: block;
-}
-
-.dosen-stat-value.hadir { color: #43e97b; }
-.dosen-stat-value.sakit { color: #f6d365; }
-.dosen-stat-value.izin { color: #4facfe; }
-.dosen-stat-value.alpha { color: #fa709a; }
-
-/* Button Group Header */
-.button-group-header {
-    margin-bottom: 25px;
-}
-
-.stats-bar {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 15px;
-    padding: 20px;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
-    border-radius: 15px;
-    margin-bottom: 20px;
-}
-
-.stat-item {
-    text-align: center;
-    padding: 10px;
-}
-
-.stat-label {
-    display: block;
-    font-size: 12px;
-    color: #999;
-    margin-bottom: 5px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.stat-value {
-    display: block;
-    font-size: 28px;
-    font-weight: 700;
-    color: #667eea;
-}
-
-.stat-value.hadir { color: #43e97b; }
-.stat-value.sakit { color: #f6d365; }
-.stat-value.izin { color: #4facfe; }
-.stat-value.alpha { color: #fa709a; }
-
-.action-buttons {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-}
-
-.btn-export, .btn-export-filtered, .btn-reset {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.btn-export {
-    background: var(--gradient-4);
-    color: white;
-}
-
-.btn-export-filtered {
-    background: var(--gradient-3);
-    color: white;
-}
-
-.btn-export:hover, .btn-export-filtered:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-}
-
-.btn-reset {
-    background: var(--gradient-2);
-    color: white;
-}
-
-.btn-reset:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-}
-
-/* Form Styles */
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: #555;
-}
-
-.label-icon {
-    font-size: 1.1em;
-}
-
-.form-group input,
-.form-group select {
-    width: 100%;
-    padding: 12px 16px;
-    border: 2px solid #e0e0e0;
-    border-radius: 12px;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    font-family: 'Inter', sans-serif;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.form-group input:disabled {
-    background: #f8f9fa;
-    color: #666;
-}
-
-.btn-submit {
-    width: 100%;
-    padding: 14px;
-    background: var(--gradient-1);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-
-.btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.btn-delete {
-    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 12px;
-    transition: all 0.3s ease;
-}
-
-.btn-delete:hover {
-    transform: scale(1.05);
-    box-shadow: 0 5px 15px rgba(238, 90, 36, 0.3);
-}
-
-/* Table Styles */
-.table-wrapper {
-    overflow-x: auto;
-    border-radius: 15px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 15px;
-    overflow: hidden;
-}
-
-th {
-    background: var(--gradient-1);
-    color: white;
-    padding: 12px;
-    text-align: left;
-    font-weight: 600;
-    font-size: 14px;
-}
-
-td {
-    padding: 12px;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 14px;
-}
-
-tr:hover {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
-}
-
-.empty-state {
-    text-align: center;
-    padding: 40px;
-}
-
-.empty-icon {
-    font-size: 3em;
-    display: block;
-    margin-bottom: 10px;
-}
-
-.empty-state p {
-    color: #999;
-}
-
-/* Alert Styles */
-.alert {
-    padding: 15px 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    animation: slideIn 0.3s ease;
-    font-weight: 500;
-    backdrop-filter: blur(10px);
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    min-width: 280px;
-    max-width: 90%;
-    text-align: center;
-    box-shadow: var(--shadow-md);
-}
-
-.alert-success {
-    background: linear-gradient(135deg, #d4edda, #c3e6cb);
-    color: #155724;
-    border-left: 4px solid #28a745;
-}
-
-.alert-error {
-    background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-    color: #721c24;
-    border-left: 4px solid #dc3545;
-}
-
-/* Modal Styles */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(5px);
-    animation: fadeIn 0.3s ease;
-}
-
-.modal-content {
-    background: var(--gradient-card);
-    margin: 10% auto;
-    width: 90%;
-    max-width: 500px;
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    animation: slideDown 0.3s ease;
-}
-
-.modal-header {
-    background: var(--gradient-1);
-    padding: 20px;
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    position: relative;
-}
-
-.modal-icon {
-    font-size: 1.5em;
-}
-
-.modal-header h2 {
-    flex: 1;
-}
-
-.close {
-    font-size: 28px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.close:hover {
-    transform: scale(1.2);
-}
-
-.modal-body {
-    padding: 30px;
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideDown {
-    from {
-        transform: translateY(-50px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(-20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-/* ============================================ */
-/* MOBILE OPTIMIZATION - TANPA MENGUBAH FITUR */
-/* ============================================ */
-
-/* Tablet (max-width: 1024px) */
-@media (max-width: 1024px) {
-    .container {
-        padding: 20px;
-    }
-    
-    .stats-dosen-grid {
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    }
-}
-
-/* Mobile Landscape (max-width: 768px) */
-@media (max-width: 768px) {
-    .container {
-        padding: 12px;
-    }
-    
-    /* Header Mobile */
-    .header-content {
-        margin-bottom: 16px;
-    }
-    
-    .logo-section {
-        gap: 12px;
-    }
-    
-    .icon-wrapper {
-        width: 48px;
-        height: 48px;
-    }
-    
-    .icon-wrapper .icon {
-        font-size: 1.8em;
-    }
-    
-    .logo-section h1 {
-        font-size: 1.2em;
-    }
-    
-    .subtitle {
-        font-size: 0.7em;
-    }
-    
-    .user-badge span {
-        font-size: 0.8em;
-    }
-    
-    .btn-glass, .btn-glass-outline {
-        padding: 6px 14px;
-        font-size: 0.8em;
-    }
-    
-    /* Date Card Mobile */
-    .date-card {
-        padding: 10px 16px;
-        gap: 10px;
-    }
-    
-    .date-icon {
-        font-size: 1.3em;
-    }
-    
-    .date-value {
-        font-size: 0.9em;
-    }
-    
-    /* Cards Mobile */
-    .form-card, .data-card {
-        padding: 16px;
-        margin-bottom: 16px;
-    }
-    
-    .card-header {
-        margin-bottom: 16px;
-    }
-    
-    .card-icon {
-        width: 36px;
-        height: 36px;
-        font-size: 1.2em;
-    }
-    
-    .card-header h2 {
-        font-size: 1.1em;
-    }
-    
-    /* Form Mobile */
-    .form-row {
-        grid-template-columns: 1fr;
-        gap: 0;
-    }
-    
-    .form-group {
-        margin-bottom: 14px;
-    }
-    
-    .form-group label {
-        font-size: 0.85em;
-    }
-    
-    .form-group input,
-    .form-group select {
-        padding: 10px 14px;
-        font-size: 14px;
-    }
-    
-    .btn-submit {
-        padding: 12px;
-        font-size: 14px;
-    }
-    
-    /* Filter Mobile */
-    .filter-section {
-        padding: 12px;
-    }
-    
-    .filter-header h3 {
-        font-size: 0.95em;
-    }
-    
-    .filter-controls {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-    
-    .filter-group select,
-    .filter-group input {
-        padding: 8px 12px;
-        font-size: 13px;
-    }
-    
-    .btn-filter {
-        padding: 8px 16px;
-        font-size: 13px;
-    }
-    
-    /* Statistics per Dosen Mobile */
-    .stats-dosen-section {
-        padding: 12px;
-    }
-    
-    .stats-dosen-section h3 {
-        font-size: 0.95em;
-        margin-bottom: 10px;
-    }
-    
-    .stats-dosen-grid {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-    
-    .dosen-stats-card {
-        padding: 10px;
-    }
-    
-    .dosen-name {
-        font-size: 0.8em;
-        margin-bottom: 8px;
-    }
-    
-    .dosen-stat-value {
-        font-size: 14px;
-    }
-    
-    .dosen-stat-label {
-        font-size: 9px;
-    }
-    
-    /* Stats Bar Mobile */
-    .stats-bar {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-        padding: 12px;
-    }
-    
-    .stat-item {
-        padding: 5px;
-    }
-    
-    .stat-value {
-        font-size: 20px;
-    }
-    
-    .stat-label {
-        font-size: 10px;
-    }
-    
-    /* Action Buttons Mobile */
-    .action-buttons {
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .btn-export, .btn-export-filtered, .btn-reset {
-        justify-content: center;
-        padding: 8px 16px;
-        font-size: 13px;
-    }
-    
-    .button-group {
-        flex-direction: column;
-        width: 100%;
-    }
-    
-    .button-group .btn-export,
-    .button-group .btn-reset {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    /* Table Mobile - Horizontal Scroll */
-    .table-wrapper {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    table {
-        min-width: 700px;
-    }
-    
-    th, td {
-        padding: 10px 8px;
-        font-size: 12px;
-        white-space: nowrap;
-    }
-    
-    .btn-delete {
-        padding: 4px 10px;
-        font-size: 11px;
-        white-space: nowrap;
-    }
-}
-
-/* Mobile Small (max-width: 480px) */
-@media (max-width: 480px) {
-    .container {
-        padding: 8px;
-    }
-    
-    .header-content {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .user-info {
-        width: 100%;
-        justify-content: flex-start;
-    }
-    
-    .logo-section {
-        width: 100%;
-    }
-    
-    .date-card {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .stats-bar {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-    
-    .stat-value {
-        font-size: 18px;
-    }
-    
-    .dosen-stats-detail {
-        gap: 5px;
-    }
-    
-    .dosen-stat-value {
-        font-size: 12px;
-    }
-    
-    /* Modal Mobile */
-    .modal-content {
-        margin: 30% auto 0;
-        width: 95%;
-    }
-    
-    .modal-header {
-        padding: 14px;
-    }
-    
-    .modal-header h2 {
-        font-size: 1.1em;
-    }
-    
-    .modal-body {
-        padding: 20px;
-    }
-    
-    /* Alert Mobile */
-    .alert {
-        top: 10px;
-        padding: 10px 16px;
-        font-size: 13px;
-        min-width: 260px;
-    }
-}
-
-/* Touch Optimization untuk Mobile */
-@media (max-width: 768px) {
-    /* Perbesar area touch untuk button */
-    button, 
-    .btn-glass, 
-    .btn-glass-outline,
-    .btn-submit,
-    .btn-export,
-    .btn-export-filtered,
-    .btn-reset,
-    .btn-filter,
-    .close,
-    .btn-delete {
-        min-height: 44px;
-        cursor: pointer;
-    }
-    
-    /* Hapus efek hover di mobile (akan muncul tap highlight) */
-    .btn-glass:hover,
-    .btn-glass-outline:hover,
-    .btn-submit:hover,
-    .btn-export:hover,
-    .btn-export-filtered:hover,
-    .btn-reset:hover,
-    .btn-filter.reset:hover,
-    .form-card:hover,
-    .data-card:hover {
-        transform: none;
-    }
-    
-    /* Smooth scroll untuk container yg overflow */
-    .table-wrapper,
-    .stats-dosen-grid {
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    /* Optimasi input mobile */
-    input, select, textarea {
-        font-size: 16px !important; /* Mencegah zoom otomatis di iOS */
-    }
-    
-    /* Perbaikan modal di mobile */
-    .modal {
-        align-items: flex-end;
-        display: flex;
-    }
-    
-    .modal-content {
-        margin: 0;
-        width: 100%;
-        max-width: 100%;
-        border-radius: 20px 20px 0 0;
-        animation: slideUp 0.3s ease;
-    }
-    
-    @keyframes slideUp {
-        from {
-            transform: translateY(100%);
+// Konfigurasi Admin
+const ADMIN_CONFIG = {
+    username: 'admin',
+    password: 'admin123'
+};
+
+// State
+let allAbsensiData = [];
+let filteredData = [];
+let isAdmin = false;
+
+// Daftar Dosen
+const DAFTAR_DOSEN = [
+    "Prof. Dr. Ahmad Suhendra, M.Kom",
+    "Dr. Rina Fitriana, S.Si., M.T",
+    "Ir. Budi Santoso, M.MSI",
+    "Dian Puspita Sari, S.Kom., M.Cs",
+    "Dr. Eng. Hendra Gunawan, S.T., M.T"
+];
+
+// Inisialisasi
+document.addEventListener('DOMContentLoaded', () => {
+    loadData();
+    checkSession(); // Hanya cek session, TIDAK membuka modal otomatis
+    setupEventListeners();
+    setupFilterListeners();
+});
+
+function setupEventListeners() {
+    document.getElementById('formAbsensi').addEventListener('submit', handleSubmitAbsensi);
+    document.getElementById('btnExport').addEventListener('click', () => exportToExcel(allAbsensiData, 'semua'));
+    document.getElementById('btnExportFiltered').addEventListener('click', () => exportToExcel(filteredData, 'filtered'));
+    document.getElementById('btnLogin').addEventListener('click', showLoginModal); // Modal hanya terbuka saat tombol ditekan
+    document.getElementById('btnLogout').addEventListener('click', handleLogout);
+    document.getElementById('btnReset').addEventListener('click', resetAllData);
+    document.getElementById('btnResetFilter').addEventListener('click', resetFilters);
+    
+    const modal = document.getElementById('loginModal');
+    const closeBtn = document.getElementsByClassName('close')[0];
+    
+    // Hanya set close button, tidak membuka modal otomatis
+    if (closeBtn) {
+        closeBtn.onclick = () => modal.style.display = 'none';
+    }
+    
+    window.onclick = (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
         }
-        to {
-            transform: translateY(0);
+    };
+    
+    document.getElementById('loginForm').addEventListener('submit', handleLogin);
+}
+
+function setupFilterListeners() {
+    const filterDosen = document.getElementById('filterDosen');
+    const filterKeterangan = document.getElementById('filterKeterangan');
+    const filterTanggal = document.getElementById('filterTanggal');
+    const filterSearch = document.getElementById('filterSearch');
+    
+    if (filterDosen) filterDosen.addEventListener('change', applyFilters);
+    if (filterKeterangan) filterKeterangan.addEventListener('change', applyFilters);
+    if (filterTanggal) filterTanggal.addEventListener('change', applyFilters);
+    if (filterSearch) filterSearch.addEventListener('input', applyFilters);
+}
+
+function checkSession() {
+    // Hanya cek session, TIDAK membuka modal otomatis
+    const savedSession = localStorage.getItem('adminSession');
+    if (savedSession) {
+        const session = JSON.parse(savedSession);
+        const sessionTime = new Date(session.timestamp);
+        const now = new Date();
+        const hoursDiff = (now - sessionTime) / (1000 * 60 * 60);
+        
+        if (hoursDiff < 24) {
+            isAdmin = true;
+            updateAdminUI();
+        } else {
+            localStorage.removeItem('adminSession');
+            isAdmin = false;
+            updateUserUI();
+        }
+    } else {
+        isAdmin = false;
+        updateUserUI();
+    }
+    updateUIByRole();
+}
+
+function updateAdminUI() {
+    // Update UI Admin (Desktop)
+    const userStatus = document.getElementById('userStatus');
+    if (userStatus) {
+        userStatus.innerHTML = '👑 Admin';
+        userStatus.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+        userStatus.style.color = 'white';
+    }
+    
+    const btnLogin = document.getElementById('btnLogin');
+    const btnLogout = document.getElementById('btnLogout');
+    const btnReset = document.getElementById('btnReset');
+    
+    if (btnLogin) btnLogin.style.display = 'none';
+    if (btnLogout) btnLogout.style.display = 'inline-block';
+    if (btnReset) btnReset.style.display = 'flex';
+    
+    // Tampilkan tombol export untuk admin
+    const exportButtons = document.querySelectorAll('.btn-export, .btn-export-filtered');
+    exportButtons.forEach(btn => {
+        btn.style.display = 'flex';
+    });
+}
+
+function updateUserUI() {
+    // Update UI User (Desktop)
+    const userStatus = document.getElementById('userStatus');
+    if (userStatus) {
+        userStatus.innerHTML = '👤 Pengguna';
+        userStatus.style.background = 'white';
+        userStatus.style.color = '#667eea';
+    }
+    
+    const btnLogin = document.getElementById('btnLogin');
+    const btnLogout = document.getElementById('btnLogout');
+    const btnReset = document.getElementById('btnReset');
+    
+    if (btnLogin) btnLogin.style.display = 'inline-block';
+    if (btnLogout) btnLogout.style.display = 'none';
+    if (btnReset) btnReset.style.display = 'none';
+    
+    // Sembunyikan tombol export untuk non-admin
+    const exportButtons = document.querySelectorAll('.btn-export, .btn-export-filtered');
+    exportButtons.forEach(btn => {
+        btn.style.display = 'none';
+    });
+}
+
+function updateUIByRole() {
+    if (isAdmin) {
+        updateAdminUI();
+    } else {
+        updateUserUI();
+    }
+}
+
+function showLoginModal() {
+    // Modal hanya terbuka saat tombol login ditekan
+    const modal = document.getElementById('loginModal');
+    if (modal) {
+        modal.style.display = 'block';
+        // Reset form
+        document.getElementById('loginForm').reset();
+        // Focus ke username
+        setTimeout(() => {
+            document.getElementById('username').focus();
+        }, 100);
+    }
+}
+
+function handleLogin(e) {
+    e.preventDefault();
+    
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    if (username === ADMIN_CONFIG.username && password === ADMIN_CONFIG.password) {
+        isAdmin = true;
+        const session = {
+            username: username,
+            timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('adminSession', JSON.stringify(session));
+        updateAdminUI();
+        
+        // Tutup modal
+        const modal = document.getElementById('loginModal');
+        if (modal) modal.style.display = 'none';
+        
+        // Reset form
+        document.getElementById('loginForm').reset();
+        
+        showAlert('Login berhasil! Selamat datang Admin.', 'success');
+        
+        // Refresh tampilan data (menampilkan tombol hapus)
+        renderTabel();
+        renderCardView(); // Jika menggunakan card view
+    } else {
+        showAlert('Username atau password salah!', 'error');
+        document.getElementById('password').value = '';
+    }
+}
+
+function handleLogout() {
+    if (confirm('Apakah Anda yakin ingin logout?')) {
+        isAdmin = false;
+        localStorage.removeItem('adminSession');
+        updateUserUI();
+        showAlert('Anda telah logout dari mode admin.', 'success');
+        
+        // Refresh tampilan data (menyembunyikan tombol hapus)
+        renderTabel();
+        renderCardView(); // Jika menggunakan card view
+    }
+}
+
+// Fungsi lainnya tetap sama seperti sebelumnya
+function getTanggalHariIni() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function formatTanggalDisplay() {
+    const today = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return today.toLocaleDateString('id-ID', options);
+}
+
+function getWaktuSekarang() {
+    const now = new Date();
+    return now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+function formatTanggalIndonesia(tanggal) {
+    const date = new Date(tanggal);
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    return date.toLocaleDateString('id-ID', options);
+}
+
+function loadData() {
+    const storedData = localStorage.getItem('absensi_permanen_dosen');
+    
+    if (storedData) {
+        allAbsensiData = JSON.parse(storedData);
+    } else {
+        allAbsensiData = [];
+    }
+    
+    applyFilters();
+}
+
+function saveData() {
+    localStorage.setItem('absensi_permanen_dosen', JSON.stringify(allAbsensiData));
+}
+
+function isNimAlreadyAbsentTodayForDosen(nim, dosen, tanggal) {
+    return allAbsensiData.some(absen => 
+        absen.nim === nim && 
+        absen.tanggal === tanggal && 
+        absen.dosen === dosen
+    );
+}
+
+function handleSubmitAbsensi(e) {
+    e.preventDefault();
+    
+    const nim = document.getElementById('nim').value.trim();
+    const nama = document.getElementById('nama').value.trim();
+    const dosen = document.getElementById('dosen').value;
+    const keterangan = document.getElementById('keterangan').value;
+    const prodi = document.getElementById('prodi_hidden').value;
+    const mataKuliah = document.getElementById('mataKuliah_hidden').value;
+    const tanggal = getTanggalHariIni();
+    
+    if (!nim || !nama || !dosen || !keterangan) {
+        showAlert('Semua field harus diisi!', 'error');
+        return;
+    }
+    
+    if (!/^\d+$/.test(nim)) {
+        showAlert('NIM harus berupa angka!', 'error');
+        return;
+    }
+    
+    if (isNimAlreadyAbsentTodayForDosen(nim, dosen, tanggal)) {
+        showAlert(`❌ Mahasiswa dengan NIM ${nim} sudah melakukan absensi untuk dosen ${dosen} hari ini!`, 'error');
+        return;
+    }
+    
+    const absensiBaru = {
+        id: Date.now(),
+        nim: nim,
+        nama: nama,
+        prodi: prodi,
+        mataKuliah: mataKuliah,
+        dosen: dosen,
+        keterangan: keterangan,
+        waktu: getWaktuSekarang(),
+        tanggal: tanggal,
+        tanggalFormatted: formatTanggalIndonesia(tanggal)
+    };
+    
+    allAbsensiData.push(absensiBaru);
+    saveData();
+    applyFilters();
+    showAlert(`✅ Absensi berhasil untuk ${nama} (${nim}) - Dosen: ${dosen.split(',')[0]}`, 'success');
+    
+    e.target.reset();
+    document.getElementById('nim').focus();
+}
+
+function deleteSingleData(id) {
+    if (!isAdmin) {
+        showAlert('Hanya admin yang dapat menghapus data!', 'error');
+        return;
+    }
+    
+    if (confirm('Apakah Anda yakin ingin menghapus data absensi ini?')) {
+        const dataToDelete = allAbsensiData.find(item => item.id === id);
+        allAbsensiData = allAbsensiData.filter(item => item.id !== id);
+        saveData();
+        applyFilters();
+        showAlert(`Data absensi ${dataToDelete.nama} berhasil dihapus`, 'success');
+    }
+}
+
+function resetAllData() {
+    if (!isAdmin) {
+        showAlert('⚠️ Hanya admin yang dapat mereset data! Silakan login sebagai admin.', 'error');
+        return;
+    }
+    
+    if (allAbsensiData.length === 0) {
+        showAlert('Tidak ada data untuk direset', 'error');
+        return;
+    }
+    
+    if (confirm('⚠️ PERINGATAN: Anda akan menghapus SEMUA data absensi! Tindakan ini tidak dapat dibatalkan. Apakah Anda yakin?')) {
+        allAbsensiData = [];
+        saveData();
+        applyFilters();
+        showAlert('Semua data absensi telah direset', 'success');
+    }
+}
+
+function applyFilters() {
+    const filterDosen = document.getElementById('filterDosen');
+    const filterKeterangan = document.getElementById('filterKeterangan');
+    const filterTanggal = document.getElementById('filterTanggal');
+    const filterSearch = document.getElementById('filterSearch');
+    
+    const filterDosenValue = filterDosen ? filterDosen.value : 'all';
+    const filterKeteranganValue = filterKeterangan ? filterKeterangan.value : 'all';
+    const filterTanggalValue = filterTanggal ? filterTanggal.value : '';
+    const filterSearchValue = filterSearch ? filterSearch.value.toLowerCase() : '';
+    
+    filteredData = allAbsensiData.filter(data => {
+        let match = true;
+        
+        if (filterDosenValue !== 'all' && data.dosen !== filterDosenValue) {
+            match = false;
+        }
+        
+        if (filterKeteranganValue !== 'all' && data.keterangan !== filterKeteranganValue) {
+            match = false;
+        }
+        
+        if (filterTanggalValue && data.tanggal !== filterTanggalValue) {
+            match = false;
+        }
+        
+        if (filterSearchValue && !data.nim.includes(filterSearchValue) && !data.nama.toLowerCase().includes(filterSearchValue)) {
+            match = false;
+        }
+        
+        return match;
+    });
+    
+    // Urutkan berdasarkan tanggal terbaru
+    filteredData.sort((a, b) => b.id - a.id);
+    
+    updateStatistics();
+    updateStatisticsPerDosen();
+    renderTabel();
+    renderCardView(); // Jika menggunakan card view
+}
+
+function resetFilters() {
+    const filterDosen = document.getElementById('filterDosen');
+    const filterKeterangan = document.getElementById('filterKeterangan');
+    const filterTanggal = document.getElementById('filterTanggal');
+    const filterSearch = document.getElementById('filterSearch');
+    
+    if (filterDosen) filterDosen.value = 'all';
+    if (filterKeterangan) filterKeterangan.value = 'all';
+    if (filterTanggal) filterTanggal.value = '';
+    if (filterSearch) filterSearch.value = '';
+    
+    applyFilters();
+    showAlert('Filter telah direset', 'success');
+}
+
+function updateStatistics() {
+    const total = filteredData.length;
+    const hadir = filteredData.filter(a => a.keterangan === 'Hadir').length;
+    const sakit = filteredData.filter(a => a.keterangan === 'Sakit').length;
+    const izin = filteredData.filter(a => a.keterangan === 'Izin').length;
+    const alpha = filteredData.filter(a => a.keterangan === 'Alpha').length;
+    
+    const totalDataEl = document.getElementById('totalData');
+    const totalHadirEl = document.getElementById('totalHadir');
+    const totalSakitEl = document.getElementById('totalSakit');
+    const totalIzinEl = document.getElementById('totalIzin');
+    const totalAlphaEl = document.getElementById('totalAlpha');
+    
+    if (totalDataEl) totalDataEl.textContent = total;
+    if (totalHadirEl) totalHadirEl.textContent = hadir;
+    if (totalSakitEl) totalSakitEl.textContent = sakit;
+    if (totalIzinEl) totalIzinEl.textContent = izin;
+    if (totalAlphaEl) totalAlphaEl.textContent = alpha;
+}
+
+function updateStatisticsPerDosen() {
+    const statsPerDosen = {};
+    
+    // Inisialisasi statistik untuk setiap dosen
+    DAFTAR_DOSEN.forEach(dosen => {
+        statsPerDosen[dosen] = {
+            total: 0,
+            hadir: 0,
+            sakit: 0,
+            izin: 0,
+            alpha: 0
+        };
+    });
+    
+    // Hitung statistik berdasarkan data yang ditampilkan (filtered)
+    filteredData.forEach(data => {
+        if (statsPerDosen[data.dosen]) {
+            statsPerDosen[data.dosen].total++;
+            statsPerDosen[data.dosen][data.keterangan.toLowerCase()]++;
+        }
+    });
+    
+    // Render statistik per dosen
+    const container = document.getElementById('statsPerDosen');
+    if (!container) return;
+    
+    let html = '<div class="stats-dosen-grid">';
+    
+    for (const [dosen, stats] of Object.entries(statsPerDosen)) {
+        if (stats.total > 0) {
+            html += `
+                <div class="dosen-stats-card">
+                    <div class="dosen-name">${dosen}</div>
+                    <div class="dosen-stats-detail">
+                        <div class="dosen-stat-item">
+                            <span class="dosen-stat-label">Total</span>
+                            <span class="dosen-stat-value">${stats.total}</span>
+                        </div>
+                        <div class="dosen-stat-item">
+                            <span class="dosen-stat-label">Hadir</span>
+                            <span class="dosen-stat-value hadir">${stats.hadir}</span>
+                        </div>
+                        <div class="dosen-stat-item">
+                            <span class="dosen-stat-label">Sakit</span>
+                            <span class="dosen-stat-value sakit">${stats.sakit}</span>
+                        </div>
+                        <div class="dosen-stat-item">
+                            <span class="dosen-stat-label">Izin</span>
+                            <span class="dosen-stat-value izin">${stats.izin}</span>
+                        </div>
+                        <div class="dosen-stat-item">
+                            <span class="dosen-stat-label">Alpha</span>
+                            <span class="dosen-stat-value alpha">${stats.alpha}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
     }
     
-    /* Animasi fadeIn untuk modal overlay */
-    .modal {
-        animation: fadeIn 0.3s ease;
+    if (html === '<div class="stats-dosen-grid">') {
+        html += '<div class="empty-state" style="grid-column: 1/-1; padding: 20px;"><p>Tidak ada data untuk ditampilkan</p></div>';
+    }
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function renderTabel() {
+    const tbody = document.getElementById('tbodyAbsensi');
+    if (!tbody) return;
+    
+    if (filteredData.length === 0) {
+        tbody.innerHTML = `<tr class="empty-row">
+            <td colspan="9">
+                <div class="empty-state">
+                    <span class="empty-icon">📭</span>
+                    <p>Tidak ada data absensi</p>
+                    <small style="color: #999;">Coba ubah filter atau tambah data baru</small>
+                </div>
+            </td>
+        </tr>`;
+        return;
+    }
+    
+    let html = '';
+    filteredData.forEach((absen, index) => {
+        const dosenShort = absen.dosen.split(',')[0];
+        
+        html += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${absen.tanggalFormatted || formatTanggalIndonesia(absen.tanggal)}</td>
+                <td title="${absen.dosen}">${dosenShort}</td>
+                <td>${absen.nim}</td>
+                <td>${absen.nama}</td>
+                <td>${absen.prodi}</td>
+                <td>${absen.mataKuliah}</td>
+                <td>${getBadgeKeterangan(absen.keterangan)}</td>
+                <td>${absen.waktu}</td>
+                <td>${getActionButtons(absen)}</td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
+}
+
+function renderCardView() {
+    const container = document.getElementById('cardView');
+    if (!container) return;
+    
+    if (filteredData.length === 0) {
+        container.innerHTML = `<div class="empty-state">
+            <span class="empty-icon">📭</span>
+            <p>Tidak ada data absensi</p>
+            <small style="color: #999;">Coba ubah filter atau tambah data baru</small>
+        </div>`;
+        return;
+    }
+    
+    let html = '';
+    filteredData.forEach((absen, index) => {
+        const dosenShort = absen.dosen.split(',')[0];
+        html += `
+            <div class="absensi-card">
+                <div class="absensi-card-header">
+                    <span class="absensi-nim">#${absen.nim}</span>
+                    <span class="absensi-tanggal">${absen.tanggalFormatted}</span>
+                </div>
+                <div class="absensi-nama">${absen.nama}</div>
+                <div class="absensi-detail">
+                    <div class="detail-item">
+                        <span class="detail-label">Dosen</span>
+                        <span>${dosenShort}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status</span>
+                        <span>${getBadgeKeteranganSimple(absen.keterangan)}</span>
+                    </div>
+                </div>
+                <div class="absensi-footer">
+                    <span class="absensi-waktu">${absen.waktu}</span>
+                    ${getActionButtonsMobile(absen)}
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function getBadgeKeterangan(keterangan) {
+    const badges = {
+        'Hadir': '<span style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">✅ Hadir</span>',
+        'Sakit': '<span style="background: linear-gradient(135deg, #f6d365, #fda085); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">🤒 Sakit</span>',
+        'Izin': '<span style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">📋 Izin</span>',
+        'Alpha': '<span style="background: linear-gradient(135deg, #fa709a, #fee140); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">❌ Alpha</span>'
+    };
+    return badges[keterangan] || keterangan;
+}
+
+function getBadgeKeteranganSimple(keterangan) {
+    const badges = {
+        'Hadir': '✅ Hadir',
+        'Sakit': '🤒 Sakit',
+        'Izin': '📋 Izin',
+        'Alpha': '❌ Alpha'
+    };
+    return badges[keterangan] || keterangan;
+}
+
+function getActionButtons(absen) {
+    if (isAdmin) {
+        return `<button class="btn-delete" onclick="deleteSingleData(${absen.id})">🗑️ Hapus</button>`;
+    }
+    return '-';
+}
+
+function getActionButtonsMobile(absen) {
+    if (isAdmin) {
+        return `<button class="btn-delete-card" onclick="deleteSingleData(${absen.id})">🗑️ Hapus</button>`;
+    }
+    return '-';
+}
+
+function showAlert(message, type) {
+    // Hapus alert yang sudah ada
+    const existingAlerts = document.querySelectorAll('.alert');
+    existingAlerts.forEach(alert => alert.remove());
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.textContent = message;
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 3000);
+}
+
+function exportToExcel(data, type) {
+    // Cek apakah user adalah admin
+    if (!isAdmin) {
+        showAlert('⚠️ Fitur export hanya dapat digunakan oleh admin! Silakan login sebagai admin terlebih dahulu.', 'error');
+        return;
+    }
+    
+    if (data.length === 0) {
+        showAlert('Tidak ada data untuk diexport', 'error');
+        return;
+    }
+    
+    try {
+        const excelData = data.map((absen, index) => ({
+            'No': index + 1,
+            'Tanggal': absen.tanggalFormatted || formatTanggalIndonesia(absen.tanggal),
+            'Dosen': absen.dosen,
+            'NIM': absen.nim,
+            'Nama Lengkap': absen.nama,
+            'Program Studi': absen.prodi,
+            'Mata Kuliah': absen.mataKuliah,
+            'Keterangan': absen.keterangan,
+            'Waktu Absensi': absen.waktu
+        }));
+        
+        const ws = XLSX.utils.json_to_sheet(excelData);
+        ws['!cols'] = [
+            {wch:5}, {wch:15}, {wch:35}, {wch:15}, {wch:25}, 
+            {wch:20}, {wch:20}, {wch:12}, {wch:12}
+        ];
+        
+        const wb = XLSX.utils.book_new();
+        const sheetName = type === 'semua' ? 'Semua_Data_Absensi' : 'Hasil_Filter_Absensi';
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        
+        const fileName = `Absensi_${getTanggalHariIni()}${type === 'filtered' ? '_filtered' : ''}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+        
+        showAlert(`✅ Berhasil export ${data.length} data ke Excel`, 'success');
+    } catch (error) {
+        showAlert('Terjadi kesalahan saat export data', 'error');
+        console.error('Export error:', error);
     }
 }
 
-/* iPhone Specific */
-@media (max-width: 428px) and (min-width: 375px) {
-    .stats-bar {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .dosen-stats-detail {
-        grid-template-columns: repeat(4, 1fr);
-    }
+// Tampilkan tanggal
+const tanggalHariIniEl = document.getElementById('tanggalHariIni');
+if (tanggalHariIniEl) {
+    tanggalHariIniEl.textContent = formatTanggalDisplay();
 }
 
-/* iPad Portrait */
-@media (min-width: 769px) and (max-width: 1024px) {
-    .stats-dosen-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .action-buttons {
-        flex-wrap: wrap;
-    }
-}
-
-/* Dark Mode Support (Optional) */
-@media (prefers-color-scheme: dark) {
-    .form-card, .data-card, .date-card {
-        background: rgba(30, 30, 40, 0.95);
-    }
-    
-    .card-header h2, .logo-section h1 {
-        color: #e0e0e0;
-    }
-    
-    .subtitle, .date-label {
-        color: #aaa;
-    }
-    
-    .form-group label {
-        color: #ccc;
-    }
-    
-    .form-group input,
-    .form-group select {
-        background: #2a2a2a;
-        border-color: #444;
-        color: #e0e0e0;
-    }
-    
-    .dosen-stats-card {
-        background: #2a2a2a;
-    }
-    
-    .dosen-name {
-        color: #e0e0e0;
-    }
-    
-    table {
-        background: #2a2a2a;
-    }
-    
-    td {
-        color: #ccc;
-        border-bottom-color: #444;
-    }
-    
-    .filter-section {
-        background: rgba(255,255,255,0.05);
-    }
-}
+// Export functions ke global scope
+window.deleteSingleData = deleteSingleData;
