@@ -24,15 +24,22 @@ async function callGoogleScript(action, data = {}) {
         });
         
         const url = `${GOOGLE_SCRIPT_URL}?${params.toString()}`;
-        console.log(`📡 Calling Google Script: ${action}`);
+        console.log(`📡 Calling Google Script: ${action}`, params.toString());
         
         const response = await fetch(url, {
             method: 'GET',
-            mode: 'cors'
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+            }
         });
         
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const result = await response.json();
-        console.log(`📡 Response:`, result);
+        console.log(`📡 Response ${action}:`, result);
         
         return result;
     } catch (error) {
@@ -103,30 +110,43 @@ async function saveDataToGoogle(absensiData) {
     }
 }
 
-// Hapus data dari Google Sheets
+// Hapus data dari Google Sheets - DIPERBAIKI
 async function deleteDataFromGoogle(id) {
     if (!isAdmin) {
         showAlert('Hanya admin yang dapat menghapus data!', 'error');
         return false;
     }
     
+    // Cari data yang akan dihapus untuk konfirmasi
+    const dataToDelete = allAbsensiData.find(item => item.id == id);
+    if (!dataToDelete) {
+        showAlert('Data tidak ditemukan!', 'error');
+        return false;
+    }
+    
+    if (!confirm(`Hapus absensi ${dataToDelete.nama} (${dataToDelete.nim})?`)) {
+        return false;
+    }
+    
     showLoading(true);
     
     try {
+        // Kirim request ke Google Script dengan action deleteData
         const result = await callGoogleScript('deleteData', {
-            id: id
+            id: id.toString()
         });
         
         if (result.success) {
+            // Refresh data dari server
             await loadDataFromGoogle();
-            showAlert('✅ Data berhasil dihapus!', 'success');
+            showAlert(`✅ Data ${dataToDelete.nama} berhasil dihapus!`, 'success');
             return true;
         } else {
-            throw new Error(result.error);
+            throw new Error(result.error || 'Gagal menghapus data');
         }
     } catch (error) {
         console.error('Delete error:', error);
-        showAlert('Gagal menghapus data!', 'error');
+        showAlert('Gagal menghapus data: ' + error.message, 'error');
         return false;
     } finally {
         showLoading(false);
@@ -274,8 +294,15 @@ async function handleSubmitAbsensi(e) {
     }
 }
 
-// Delete data
+// Delete data - DIPERBAIKI
 async function deleteSingleData(id) {
+    console.log('🗑️ deleteSingleData dipanggil dengan ID:', id);
+    
+    if (!isAdmin) {
+        showAlert('Hanya admin yang dapat menghapus data!', 'error');
+        return;
+    }
+    
     await deleteDataFromGoogle(id);
 }
 
@@ -321,11 +348,17 @@ function updateStatistics() {
     const izin = filteredData.filter(a => a.keterangan === 'Izin').length;
     const alpha = filteredData.filter(a => a.keterangan === 'Alpha').length;
     
-    document.getElementById('totalData').textContent = total;
-    document.getElementById('totalHadir').textContent = hadir;
-    document.getElementById('totalSakit').textContent = sakit;
-    document.getElementById('totalIzin').textContent = izin;
-    document.getElementById('totalAlpha').textContent = alpha;
+    const totalEl = document.getElementById('totalData');
+    const hadirEl = document.getElementById('totalHadir');
+    const sakitEl = document.getElementById('totalSakit');
+    const izinEl = document.getElementById('totalIzin');
+    const alphaEl = document.getElementById('totalAlpha');
+    
+    if (totalEl) totalEl.textContent = total;
+    if (hadirEl) hadirEl.textContent = hadir;
+    if (sakitEl) sakitEl.textContent = sakit;
+    if (izinEl) izinEl.textContent = izin;
+    if (alphaEl) alphaEl.textContent = alpha;
 }
 
 function updateStatisticsPerDosen() {
@@ -408,7 +441,9 @@ function renderTabel() {
                 <td>${absen.nama}</td>
                 <td>${getBadgeKeterangan(absen.keterangan)}</td>
                 <td>${absen.waktu}</td>
-                <td>${getActionButtons(absen)}</td>
+                <td class="action-cell">
+                    ${isAdmin ? `<button class="btn-delete" data-id="${absen.id}" onclick="deleteSingleData(${absen.id})">🗑️ Hapus</button>` : '-'}
+                </td>
             </tr>
         `;
     });
@@ -423,13 +458,6 @@ function getBadgeKeterangan(keterangan) {
         'Alpha': '<span style="background: #fa709a; color: white; padding: 4px 12px; border-radius: 20px;">❌ Alpha</span>'
     };
     return badges[keterangan] || keterangan;
-}
-
-function getActionButtons(absen) {
-    if (isAdmin) {
-        return `<button class="btn-delete" onclick="deleteSingleData(${absen.id})">🗑️ Hapus</button>`;
-    }
-    return '-';
 }
 
 function showAlert(message, type) {
@@ -661,5 +689,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('✅ Aplikasi siap digunakan');
 });
 
-// Global functions
+// Global functions - DIPERBAIKI agar bisa dipanggil dari HTML
 window.deleteSingleData = deleteSingleData;
