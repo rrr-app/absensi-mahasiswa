@@ -197,26 +197,28 @@ function showLoading(show) {
 }
 
 function getTanggalHariIni() {
-    return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Makassar' });
-}
-
-function getWaktuSekarang() {
-    return new Date().toLocaleTimeString('id-ID', { timeZone: 'Asia/Makassar', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 function formatTanggalDisplay() {
-    return new Date().toLocaleDateString('id-ID', { timeZone: 'Asia/Makassar', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const today = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return today.toLocaleDateString('id-ID', options);
 }
 
-function formatTanggalIndonesia(tanggalString) {
-    if (tanggalString) {
-        // tanggalString format YYYY-MM-DD
-        const [year, month, day] = tanggalString.split('-');
-        const date = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
-        return date.toLocaleDateString('id-ID', { timeZone: 'Asia/Makassar', day: 'numeric', month: 'long', year: 'numeric' });
-    } else {
-        return new Date().toLocaleDateString('id-ID', { timeZone: 'Asia/Makassar', day: 'numeric', month: 'long', year: 'numeric' });
-    }
+function getWaktuSekarang() {
+    const now = new Date();
+    return now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+function formatTanggalIndonesia(tanggal) {
+    const date = new Date(tanggal);
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    return date.toLocaleDateString('id-ID', options);
 }
 
 // Handle submit absensi
@@ -259,7 +261,7 @@ async function handleSubmitAbsensi(e) {
         keterangan: keterangan,
         waktu: getWaktuSekarang(),
         tanggal: tanggal,
-        tanggal_formatted: formatTanggalIndonesia(tanggalString)
+        tanggal_formatted: formatTanggalIndonesia(tanggal)
     };
     
     // Simpan
@@ -458,7 +460,7 @@ function exportToExcel(data, type) {
             'No': index + 1,
             'Nama Lengkap': absen.nama,
             'NIM': absen.nim,
-            'Tanggal': absen.tanggal_formatted,
+            'Tanggal': absen.tanggalFormatted || formatTanggalIndonesia(absen.tanggal),
             'Waktu Absensi': absen.waktu
         }));
         
